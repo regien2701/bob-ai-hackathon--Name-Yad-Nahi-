@@ -1,4 +1,5 @@
 https://drive.google.com/file/d/1h-CiBepgOaLSpKZjyMBGE4ycU7SsZjEk/view?usp=sharing
+
 Replace the URL above with a link to your demo video.
 
 Accepted platforms:
@@ -8,7 +9,7 @@ Accepted platforms:
   - Google Drive (set to "Anyone with the link can view")
 
 Video requirements:
-  - Length: 3–5 minutes maximum
+  - Length: 2–5 minutes
   - Must show the application running (not just slides)
   - Should walk through at least one key feature end-to-end
   - Audio narration strongly recommended

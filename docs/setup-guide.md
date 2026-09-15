@@ -81,6 +81,11 @@ Copy the example environment file and edit it:
 cp .env.example .env
 ```
 
+**Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
+```
+
 Open `.env` in any text editor. The minimum required change is setting a Flask
 secret key:
 
@@ -112,6 +117,11 @@ All other values have sensible defaults and can be left as-is for a basic demo.
 ## 6 — Run the Application
 
 ```bash
+python run.py
+```
+
+**Windows (PowerShell from `src/` directory):**
+```powershell
 python run.py
 ```
 
@@ -200,11 +210,16 @@ From the `src/` directory (with the virtual environment active):
 pytest tests/ -v
 ```
 
+**Windows (PowerShell):**
+```powershell
+python -m pytest tests/ -v
+```
+
 All tests run without a live watsonx API key — the watsonx client is mocked in
-`tests/test_bluf.py`. You should see output ending in something like:
+`tests/test_bluf.py`. You should see output ending in:
 
 ```
-====== 30 passed in 4.21s ======
+====== 55 passed in N.NNs ======
 ```
 
 To run a specific test file:
@@ -247,3 +262,4 @@ load sample data again.
 | BLUF shows "template" badge even with API key set | watsonx call failed silently | Check the Flask console for error lines starting with `[BLUF]`; verify the key and project ID |
 | CSV upload returns 400 error | Missing required columns | Ensure your CSV has at least `source_ip`, `dest_ip`, `event_type`, and `severity` columns (any recognised alias names accepted) |
 | Charts not rendering | Browser JS error | Open DevTools console; ensure Chart.js CDN is reachable or use the sample data button which uses no external assets |
+| PowerShell execution policy blocks `.venv\Scripts\Activate.ps1` | Windows execution policy | Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` then try again |

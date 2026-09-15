@@ -163,7 +163,7 @@ def test_fp_low_score():
 
 def test_fp_duplicate():
     """Test 9 — same src+dst+event_type within 60 s window → is_fp=True."""
-    detector = FPDetector(whitelist_ips=[])
+    detector = FPDetector(whitelist_ips=[], scanner_cidr="")
     ts1 = "2024-01-01T12:00:00+00:00"
     ts2 = "2024-01-01T12:00:30+00:00"  # 30 seconds later — within window
 

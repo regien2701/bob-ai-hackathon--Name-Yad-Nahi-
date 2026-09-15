@@ -9,30 +9,28 @@
 # =============================================================================
 
 team:
-  name: "Name Yad Nahi"                # REQUIRED — e.g., "Orion Squad"
+  name: "Name Yad Nahi"                # REQUIRED
   track: "AI"                          # REQUIRED — one of: AI | DevOps | Sustainability | Open
   lead:
-    name: "Arya Raval"                  # REQUIRED — e.g., "Alice Chen"
-    email: "26pgce030@charusat.edu.in"             # REQUIRED — e.g., "alice.chen@ibm.com"
+    name: "Arya Raval"                  # REQUIRED
+    email: "26pgce030@charusat.edu.in"  # REQUIRED
   members:
-    - name: "Arav Patel "               # REQUIRED — Team member 1
-      email: "26pgce015@charusat.edu.in"
-    - name: "Rudra Tanti"
+    - name: "Arya Raval"
       email: "26pgce030@charusat.edu.in"
     - name: "Salman meman"
       email: "26pgce012@charusat.edu.in"
 
 submission:
-  title: "ThreatIntel Correlator"      # REQUIRED — Project display name
+  title: "ThreatIntel Correlator"      # REQUIRED
 
-  problem_statement: >                 # REQUIRED — 1-3 sentences. What problem? Who has it?
+  problem_statement: >                 # REQUIRED
     Security Operations Centre analysts are overwhelmed by hundreds of noisy,
     uncorrelated alerts every shift, making it nearly impossible to identify genuine
     threats before attackers achieve their objectives. Manual triage is slow,
     error-prone, and leads to alert fatigue — causing real incidents to be missed
     or responded to too late.
 
-  solution_summary: >                  # REQUIRED — 1-3 sentences. What did you build?
+  solution_summary: >                  # REQUIRED
     ThreatIntel Correlator is a Flask web application that automatically ingests
     multi-source threat alerts, scores and classifies each one with a transparent
     rule-based engine, correlates related alerts into incidents, maps techniques to
@@ -40,12 +38,12 @@ submission:
     every high-priority incident using IBM watsonx.ai — giving SOC analysts and
     commanders a single, prioritised view of what is actually happening.
 
-  key_features:                        # REQUIRED — List 3 to 5 specific features you implemented
-    - "Transparent weighted-sum risk scoring (0-100) with per-factor breakdown visible in the UI — fully explainable, no black box"
+  key_features:                        # REQUIRED — 3 to 5 specific features
+    - "Transparent weighted-sum risk scoring (0-100) with per-factor breakdown (severity, event type, destination sensitivity, recurrence, keywords) visible in the UI — fully explainable, no black box"
     - "Automated alert correlation engine that groups related alerts into incidents by shared source IP and MITRE technique within a configurable time window"
-    - "MITRE ATT&CK technique mapping via keyword-matching against a curated local lookup table, with tactic heatmap visualisation"
-    - "IBM watsonx.ai BLUF generation using ibm/granite-13b-instruct-v2 with a deterministic template fallback when no API key is present"
-    - "Deterministic false-positive detection with six heuristic rules (IP whitelist, known scanner, duplicate suppression, low-score filter) and a separate FP review queue"
+    - "MITRE ATT&CK technique mapping via keyword-matching against a curated local lookup table (~25 techniques), with tactic heatmap visualisation on the MITRE Map page"
+    - "IBM watsonx.ai BLUF generation using ibm/granite-13b-instruct-v2 with a deterministic template fallback when no API key is present — prototype is fully demoable offline"
+    - "Deterministic false-positive detection with six heuristic rules (IP whitelist, known scanner CIDR, informational-recon filter, 60-second duplicate suppression, low-score filter) and a separate FP review queue"
 
   tech_stack:
     languages: ["Python", "HTML", "CSS", "JavaScript"]
@@ -54,7 +52,7 @@ submission:
     databases: ["SQLite"]
     other: ["Chart.js", "pytest", "python-dotenv"]
 
-  what_we_are_most_proud_of: >         # Optional but recommended — guides judges to your best work
+  what_we_are_most_proud_of: >         # Optional but recommended
     We are most proud of the watsonx.ai BLUF generation combined with the
     explainable scoring engine. Every risk score can be decomposed into its five
     contributing factors directly in the UI, and every HIGH-priority incident gets
@@ -63,7 +61,7 @@ submission:
     through raw alert tables. The graceful template fallback ensures the prototype
     is fully demoable even without a live watsonx API key.
 
-  known_limitations: >                 # Optional but recommended — be honest about gaps
+  known_limitations: >                 # Optional but recommended
     This is a student-level prototype built for the hackathon. All alert data is
     synthetic and not sourced from real threat feeds. Live SIEM connectors
     (Splunk, QRadar) are stubbed out and not implemented. There is no user
