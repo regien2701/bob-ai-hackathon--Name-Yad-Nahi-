@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}MITRE ATT&CK Map{% endblock %}
+{% block page_title %}MITRE ATT&CK Coverage Map{% endblock %}
+
+{% block content %}
+
+{% set total_techniques = namespace(n=0) %}
+{% set unique_tactics = namespace(n=0) %}
+{% set detected_techniques = namespace(n=0) %}
+{% for tactic, techs in by_tactic.items() %}
+  {% set unique_tactics.n = unique_tactics.n + 1 %}
+  {% for tech in techs %}
+    {% set total_techniques.n = total_techniques.n + 1 %}
+    {% if tech.count > 0 %}{% set detected_techniques.n = detected_techniques.n + 1 %}{% endif %}
+  {% endfor %}
+{% endfor %}
+
+{% set max_count = namespace(v=1) %}
+{% for tactic, techs in by_tactic.items() %}
+  {% for tech in techs %}
+    {% if tech.count > max_count.v %}{% set max_count.v = tech.count %}{% endif %}
+  {% endfor %}
+{% endfor %}
+
+<div class="page-header">
+  <h1>MITRE ATT&amp;CK Coverage Map</h1>
+  <div class="page-subtitle">Technique detection coverage across your ingested alert data</div>
+</div>
+
+<!-- ===== Summary stats ===== -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px">
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-total">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-label">Techniques Detected</div>
+      <div class="kpi-value accent">{{ detected_techniques.n }}</div>
+      <div class="kpi-sub">of {{ total_techniques.n }} known</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-label">Unique Tactics</div>
+      <div class="kpi-value">{{ unique_tactics.n }}</div>
+      <div class="kpi-sub">ATT&amp;CK tactic categories</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-fp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-label">Coverage</div>
+      <div class="kpi-value">
+        {% if total_techniques.n > 0 %}
+          {{ ((detected_techniques.n / total_techniques.n) * 100) | round(1) }}%
+        {% else %}
+          0%
+        {% endif %}
+      </div>
+      <div class="kpi-sub">of known techniques seen</div>
+    </div>
+  </div>
+</div>
+
+{% if by_tactic %}
+
+{% for tactic, techs in by_tactic.items() %}
+{% set tactic_count = namespace(total=0) %}
+{% for tech in techs %}{% set tactic_count.total = tactic_count.total + tech.count %}{% endfor %}
+
+<div class="tactic-section">
+  <div class="tactic-header">
+    {{ tactic }}
+    <span style="float:right;font-size:10px;font-weight:400;color:var(--muted2);letter-spacing:0;text-transform:none;font-family:var(--font-ui)">
+      {{ tactic_count.total }} alert{{ 's' if tactic_count.total != 1 }}
+      &nbsp;·&nbsp; {{ techs | length }} technique{{ 's' if techs | length != 1 }}
+    </span>
+  </div>
+  <div class="table-wrapper" style="border-radius:0 0 var(--radius) var(--radius)">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:100px">Technique ID</th>
+          <th>Technique Name</th>
+          <th style="width:80px;text-align:right">Alerts</th>
+          <th style="width:160px">Frequency</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tech in techs | sort(attribute='count', reverse=True) %}
+        <tr class="{% if tech.count == 0 %}mitre-zero{% endif %}">
+          <td>
+            <a href="{{ url_for('dashboard.alerts') }}?priority="
+               style="color:var(--cyan);font-family:var(--font-mono);font-size:11.5px">
+              {{ tech.technique_id }}
+            </a>
+          </td>
+          <td>{{ tech.technique_name }}</td>
+          <td style="text-align:right;font-weight:{% if tech.count > 0 %}700{% else %}400{% endif %};font-family:var(--font-mono)">
+            {% if tech.count > 0 %}
+              <span style="color:{% if tech.count >= max_count.v * 0.7 %}var(--high){% elif tech.count >= max_count.v * 0.3 %}var(--medium){% else %}var(--low){% endif %}">
+                {{ tech.count }}
+              </span>
+            {% else %}
+              <span class="text-muted">0</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if tech.count > 0 %}
+            <div class="mitre-bar" style="width:100%">
+              <div class="fill"
+                   style="width:{{ ((tech.count / max_count.v) * 100) | round(1) }}%;
+                          background:{% if tech.count >= max_count.v * 0.7 %}var(--high){% elif tech.count >= max_count.v * 0.3 %}var(--medium){% else %}var(--low){% endif %}">
+              </div>
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endfor %}
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">◈</div>
+  <h3>No MITRE data available</h3>
+  <p>Ingest alerts to see MITRE ATT&amp;CK technique coverage. <a href="{{ url_for('dashboard.upload') }}">Load data →</a></p>
+</div>
+{% endif %}
+
+{% endblock %}

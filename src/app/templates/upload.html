@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Data Ingestion{% endblock %}
+{% block page_title %}Data Ingestion{% endblock %}
+
+{% block content %}
+<div class="upload-area">
+
+  <div class="page-header">
+    <h1>Upload Threat Intel Data</h1>
+    <div class="page-subtitle">Ingest CSV or JSON alert data through the full processing pipeline</div>
+  </div>
+
+  <!-- ===== Drop zone ===== -->
+  <div class="drop-zone" id="drop-zone">
+    <span class="drop-icon">☁</span>
+    <h3>Drag &amp; drop your file here</h3>
+    <p>or click to browse your computer</p>
+    <div class="file-types">Accepted: .csv &nbsp;·&nbsp; .json</div>
+    <input type="file" id="file-input" accept=".csv,.json">
+  </div>
+
+  <!-- Progress bar (hidden until upload starts) -->
+  <div class="upload-progress" id="upload-progress">
+    <div class="flex items-center gap-2 mb-2">
+      <div class="spinner"></div>
+      <span style="color:var(--muted2);font-size:13px;font-family:var(--font-mono)" id="progress-label">Uploading…</span>
+    </div>
+    <div class="progress-bar-upload">
+      <div class="fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Upload result (hidden until done) -->
+  <div class="upload-result" id="upload-result">
+    <div class="card">
+      <div class="flex items-center gap-2 mb-4">
+        <span style="font-size:18px;color:var(--low)">✓</span>
+        <div class="card-title" style="margin-bottom:0;color:var(--low)">Ingestion Complete</div>
+      </div>
+      <div class="result-stats" id="result-stats"></div>
+      <div style="margin-top:14px">
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">View Dashboard →</a>
+        <a href="{{ url_for('dashboard.alerts') }}" class="btn btn-secondary" style="margin-left:8px">Browse Alerts</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error display -->
+  <div id="upload-error" class="hidden">
+    <div class="flash error" id="upload-error-msg"></div>
+  </div>
+
+  <!-- ===== Sample data ===== -->
+  <div style="text-align:center;margin:24px 0 18px">
+    <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:18px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="color:var(--muted2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-mono)">or</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <button class="btn btn-primary btn-lg" id="btn-load-sample">
+      ⚡ Load Built-in Sample Data
+    </button>
+    <p class="text-muted mt-2" style="font-size:12px">
+      Loads 50 pre-generated alerts covering multiple MITRE ATT&amp;CK techniques
+    </p>
+  </div>
+
+  <!-- ===== Format guide ===== -->
+  <div class="format-guide">
+    <h4>Expected CSV Columns</h4>
+    <p style="color:var(--muted2);font-size:12px;margin-bottom:10px">
+      All fields are optional except <code>event_type</code>. Missing fields fall back to safe defaults.
+    </p>
+    <div style="margin-bottom:8px">
+      <code>timestamp</code>
+      <code>source_ip</code>
+      <code>dest_ip</code>
+      <code>event_type</code>
+      <code>severity</code>
+      <code>description</code>
+      <code>source_feed</code>
+    </div>
+    <h4 style="margin-top:14px">Supported Event Types</h4>
+    <div style="margin-top:6px">
+      <code>brute_force</code>
+      <code>port_scan</code>
+      <code>data_exfiltration</code>
+      <code>malware_detected</code>
+      <code>privilege_escalation</code>
+      <code>lateral_movement</code>
+      <code>c2_communication</code>
+      <code>ddos</code>
+      <code>phishing</code>
+      <code>ransomware</code>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

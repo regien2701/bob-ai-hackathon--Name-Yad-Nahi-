@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+
+{% block content %}
+
+{% if total_alerts == 0 %}
+<!-- ===== Empty state ===== -->
+<div class="empty-state">
+  <div class="empty-icon">🛡</div>
+  <h3>No data yet</h3>
+  <p>Load the built-in sample dataset to see the dashboard in action.</p>
+  <button class="btn btn-primary btn-lg" id="btn-load-sample">⚡ Load Sample Data</button>
+  <p class="text-muted mt-3" style="font-size:12px">Or <a href="{{ url_for('dashboard.upload') }}">upload your own CSV / JSON file</a></p>
+</div>
+
+{% else %}
+
+<!-- Welcome header -->
+<div style="margin-bottom:18px">
+  <h2 style="font-size:20px;font-weight:700;color:var(--text-bright)">Welcome Back, <span style="color:var(--cyan)">Analyst</span></h2>
+  <p style="color:var(--muted2);font-size:12.5px;margin-top:2px">Here's what's happening with your threat intelligence feed.</p>
+</div>
+
+<!-- ===== KPI Cards ===== -->
+<div class="kpi-grid">
+  <!-- Total Alerts -->
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-total">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-label">Total Alerts</div>
+      <div class="kpi-value" id="kpi-total-alerts">{{ total_alerts }}</div>
+      <div class="kpi-trend up">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1L9 5H1L5 1Z" fill="currentColor"/></svg>
+        12% vs. previous 24h
+      </div>
+      <canvas class="kpi-sparkline" id="spark-total"></canvas>
+    </div>
+  </div>
+
+  <!-- High / Critical -->
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-high">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-label">High / Critical</div>
+      <div class="kpi-value high" id="kpi-high-incidents">{{ high_incidents }}</div>
+      <div class="kpi-trend down">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1L9 5H1L5 1Z" fill="currentColor"/></svg>
+        33% vs. previous 24h
+      </div>
+      <canvas class="kpi-sparkline" id="spark-high"></canvas>
+    </div>
+  </div>
+
+  <!-- Active Incidents -->
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-label">Active Incidents</div>
+      <div class="kpi-value blue" id="kpi-open-incidents">{{ open_incidents }}</div>
+      <div class="kpi-trend up">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1L9 5H1L5 1Z" fill="currentColor"/></svg>
+        100% vs. previous 24h
+      </div>
+      <canvas class="kpi-sparkline" id="spark-incidents"></canvas>
+    </div>
+  </div>
+
+  <!-- False Positives -->
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-fp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <div class="kpi-body">
+      <div class="kpi-label">False Positives</div>
+      <div class="kpi-value" id="kpi-fp-rate">{{ fp_count }}</div>
+      <div class="kpi-trend neutral">
+        <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1" y="4" width="8" height="2" fill="currentColor"/></svg>
+        {{ fp_rate }}% suppression rate
+      </div>
+      <canvas class="kpi-sparkline" id="spark-fp"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Two-column body ===== -->
+<div class="dash-body">
+
+  <!-- Left / Main column -->
+  <div class="dash-main">
+
+    <!-- Map + Top Sources -->
+    <div class="map-sources-row">
+      <!-- Top Attack Sources table -->
+      <div class="card" style="padding:14px 16px">
+        <div class="card-header">
+          <div class="card-title">Top Attack Sources</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">
+            <span style="color:var(--high)">● High</span>
+            <span style="color:var(--medium);margin-left:6px">● Medium</span>
+            <span style="color:var(--low);margin-left:6px">● Low</span>
+          </div>
+        </div>
+        <table style="font-size:12px">
+          <tbody>
+            {% set seen_ips = namespace(ips=[]) %}
+            {% for alert in recent_alerts %}
+              {% if alert.source_ip and alert.source_ip not in seen_ips.ips %}
+                {% set seen_ips.ips = seen_ips.ips + [alert.source_ip] %}
+                {% set p = (alert.priority or 'LOW')|upper %}
+                <tr>
+                  <td style="padding:5px 0">
+                    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--{{ 'high' if p == 'HIGH' else ('medium' if p == 'MEDIUM' else 'low') }});margin-right:6px;box-shadow:0 0 4px var(--{{ 'high' if p == 'HIGH' else ('medium' if p == 'MEDIUM' else 'low') }})"></span>
+                    <code style="background:none;padding:0;color:var(--text)">{{ alert.source_ip }}</code>
+                  </td>
+                  <td style="padding:5px 0;text-align:right;color:var(--muted2);font-family:var(--font-mono);font-size:11px">
+                    {{ loop.revindex }}
+                  </td>
+                </tr>
+              {% endif %}
+              {% if seen_ips.ips|length >= 5 %}{% break %}{% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- World map -->
+      <div class="world-map-wrap">
+        <div class="card-title" style="margin-bottom:8px">Alert Origins</div>
+        <!-- Simplified SVG world map -->
+        <svg class="world-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="800" height="400" fill="none"/>
+          <!-- Simplified continent outlines -->
+          <!-- North America -->
+          <path d="M 80 80 L 180 60 L 220 80 L 240 120 L 220 160 L 180 180 L 160 200 L 130 220 L 100 200 L 80 160 L 60 130 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+          <!-- South America -->
+          <path d="M 160 240 L 200 230 L 220 260 L 215 320 L 195 360 L 170 370 L 155 340 L 148 300 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+          <!-- Europe -->
+          <path d="M 360 60 L 420 55 L 440 80 L 430 110 L 400 120 L 370 110 L 350 90 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+          <!-- Africa -->
+          <path d="M 370 140 L 420 130 L 450 150 L 455 210 L 440 270 L 410 300 L 380 280 L 360 230 L 355 170 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+          <!-- Asia -->
+          <path d="M 450 50 L 620 45 L 680 70 L 700 110 L 680 150 L 630 160 L 570 150 L 520 160 L 480 140 L 450 110 L 440 80 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+          <!-- Southeast Asia -->
+          <path d="M 620 160 L 670 170 L 680 200 L 660 210 L 630 200 L 610 180 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+          <!-- Australia -->
+          <path d="M 620 270 L 700 260 L 720 300 L 700 340 L 660 350 L 620 330 L 605 300 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+        </svg>
+        <!-- Glowing attack dots (static representative positions) -->
+        <div class="map-dot high"   style="left:27%;top:42%"></div>
+        <div class="map-dot medium" style="left:15%;top:38%"></div>
+        <div class="map-dot high"   style="left:55%;top:28%"></div>
+        <div class="map-dot low"    style="left:48%;top:45%"></div>
+        <div class="map-dot medium" style="left:72%;top:32%"></div>
+        <div class="map-dot high"   style="left:82%;top:38%"></div>
+        <div class="map-dot low"    style="left:63%;top:22%"></div>
+      </div>
+    </div>
+
+    <!-- Charts row: Alert Severity donut + Tactic bar -->
+    <div class="charts-row">
+      <!-- Alert Severity donut -->
+      <div class="card">
+        <div class="card-title">Alert Severity</div>
+        <div class="chart-container">
+          <canvas id="priorityChart"></canvas>
+        </div>
+      </div>
+      <!-- Alerts by MITRE Tactic bar -->
+      <div class="card">
+        <div class="card-title">Alerts by MITRE Tactic</div>
+        <div class="chart-container" style="height:220px">
+          <canvas id="tacticChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Alerts dense table -->
+    <div class="card mb-5">
+      <div class="card-header">
+        <div class="card-title">Recent Alerts</div>
+        <a href="{{ url_for('dashboard.alerts') }}" class="btn btn-secondary btn-sm">View All →</a>
+      </div>
+      {% if recent_alerts %}
+      <div class="table-wrapper" style="border:none;border-radius:0">
+        <table id="alerts-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Severity</th>
+              <th>Source</th>
+              <th>Event Type</th>
+              <th>Source IP</th>
+              <th>Dest IP</th>
+              <th>MITRE</th>
+              <th>Risk Score</th>
+              <th>Status</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for alert in recent_alerts %}
+            {% set p = (alert.priority or 'UNKNOWN')|upper %}
+            {% set score = (alert.risk_score or 0)|round(1) %}
+            <tr class="row-clickable" data-alert-id="{{ alert.id }}" data-expanded="false">
+              <td class="font-mono" style="color:var(--muted2)">A-{{ alert.id }}</td>
+              <td><span class="badge badge-{{ p|lower }}">{{ p }}</span></td>
+              <td style="color:var(--muted2)">{{ alert.source_feed or '—' }}</td>
+              <td>{{ alert.event_type or '—' }}</td>
+              <td><code>{{ alert.source_ip or '—' }}</code></td>
+              <td><code>{{ alert.dest_ip or '—' }}</code></td>
+              <td>
+                {% if alert.mitre_technique_id %}
+                  <span class="tag">{{ alert.mitre_technique_id }}</span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="score-badge score-{{ 'high' if score >= 70 else ('medium' if score >= 40 else 'low') }}">{{ score }}</span>
+              </td>
+              <td>
+                {% if alert.is_false_positive %}
+                  <span class="badge badge-fp-yes">FP</span>
+                {% else %}
+                  <span class="badge badge-open">Open</span>
+                {% endif %}
+              </td>
+              <td class="font-mono" style="color:var(--muted2);font-size:11px;white-space:nowrap">
+                {{ alert.timestamp.strftime('%H:%M') if alert.timestamp else '—' }}
+              </td>
+            </tr>
+            <!-- Detail expand row -->
+            <tr class="detail-row hidden" id="detail-row-{{ alert.id }}">
+              <td colspan="10">
+                <div class="detail-panel" id="detail-panel-{{ alert.id }}">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div>
+                      <div class="card-title" style="margin-bottom:6px">Score Breakdown</div>
+                      {% if alert.score_breakdown %}
+                        <div class="score-grid">
+                          {% for factor, val in alert.score_breakdown.items() %}
+                          <div class="score-factor">
+                            <div class="score-factor-label">{{ factor|replace('_',' ') }}</div>
+                            <div class="score-factor-value">{{ val }}</div>
+                            <div class="progress-bar"><div class="progress-fill" style="width:{{ [val,100]|min }}%"></div></div>
+                          </div>
+                          {% endfor %}
+                        </div>
+                      {% else %}
+                        <p class="text-muted" style="font-size:12px">No breakdown available</p>
+                      {% endif %}
+                      {% if alert.fp_reason %}
+                        <div style="margin-top:10px">
+                          <div class="card-title" style="margin-bottom:4px">FP Reason</div>
+                          <p style="font-size:12px;color:var(--medium)">{{ alert.fp_reason }}</p>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <div class="card-title" style="margin-bottom:6px">Raw Data</div>
+                      <pre class="json-block">{{ alert.raw_data|tojson(indent=2) if alert.raw_data else '{}' }}</pre>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted">No alerts ingested yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- False Positives table -->
+    <div class="card mb-5">
+      <div class="card-header">
+        <div class="card-title">False Positives</div>
+        <a href="{{ url_for('dashboard.alerts') }}?fp=true" class="btn btn-secondary btn-sm">View All →</a>
+      </div>
+      {% set fp_alerts = recent_alerts | selectattr('is_false_positive') | list %}
+      {% if fp_alerts %}
+      <div class="table-wrapper" style="border:none;border-radius:0">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Source</th><th>Event Type</th><th>Reason</th><th>Detected At</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for alert in fp_alerts[:4] %}
+            <tr>
+              <td class="font-mono" style="color:var(--muted2)">A-{{ alert.id }}</td>
+              <td style="color:var(--muted2)">{{ alert.source_feed or '—' }}</td>
+              <td>{{ alert.event_type or '—' }}</td>
+              <td style="color:var(--muted2);font-size:12px">{{ alert.fp_reason or 'Auto-detected' }}</td>
+              <td class="font-mono" style="color:var(--muted2);font-size:11px">
+                {{ alert.timestamp.strftime('%H:%M') if alert.timestamp else '—' }} ago
+              </td>
+              <td><span class="badge badge-fp-yes">FP</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted" style="font-size:12px;padding:8px 0">No false positives detected.</p>
+      {% endif %}
+    </div>
+
+  </div><!-- /.dash-main -->
+
+  <!-- Right column -->
+  <div class="dash-right">
+
+    <!-- Threat Level gauge -->
+    <div class="threat-gauge-card">
+      <div class="threat-gauge-title">Threat Level</div>
+      <div class="gauge-svg-wrap">
+        {% set top_inc = top_incidents[0] if top_incidents else none %}
+        {% set gauge_score = (top_inc.risk_score if top_inc else 0)|round(0)|int %}
+        {% set gauge_color = '#ff3b3b' if gauge_score >= 70 else ('#f59e0b' if gauge_score >= 40 else '#22c55e') %}
+        {% set gauge_level_cls = 'high' if gauge_score >= 70 else ('medium' if gauge_score >= 40 else 'low') %}
+        {% set gauge_level_txt = 'HIGH' if gauge_score >= 70 else ('MEDIUM' if gauge_score >= 40 else 'LOW') %}
+        {% set arc = (gauge_score / 100 * 251.2)|round(1) %}
+        <svg width="160" height="90" viewBox="0 0 160 90">
+          <!-- Background arc -->
+          <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="var(--border2)" stroke-width="10" stroke-linecap="round"/>
+          <!-- Colored arc -->
+          <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none"
+                stroke="{{ gauge_color }}" stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="{{ arc }} 251.2"
+                style="filter:drop-shadow(0 0 6px {{ gauge_color }})"/>
+          <!-- Score label -->
+          <text x="80" y="72" text-anchor="middle" class="gauge-label" style="font-size:22px;fill:{{ gauge_color }};font-family:'Space Grotesk',sans-serif;font-weight:800">
+            {{ gauge_score }}
+          </text>
+          <text x="80" y="85" text-anchor="middle" class="gauge-sublabel" style="fill:var(--muted2);font-size:9px;font-family:'JetBrains Mono',monospace">
+            /100
+          </text>
+        </svg>
+      </div>
+      <div class="gauge-level {{ gauge_level_cls }}">{{ gauge_level_txt }}</div>
+      <div class="gauge-desc">
+        {% if gauge_score >= 70 %}Elevated activity detected across multiple sources.
+        {% elif gauge_score >= 40 %}Moderate threat activity. Monitor closely.
+        {% else %}Low activity. Systems nominal.{% endif %}
+      </div>
+      <!-- Color bar segments -->
+      <div class="gauge-bars">
+        {% for i in range(7) %}
+          {% set seg_score = (i + 1) * 14 %}
+          <div class="gauge-bar-seg" style="background:{% if seg_score <= gauge_score %}{{ gauge_color }}{% else %}var(--border2){% endif %}"></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- MITRE ATT&CK Tactics panel -->
+    <div class="card" style="padding:14px 16px;margin-bottom:14px">
+      <div class="card-header">
+        <div class="card-title">MITRE ATT&CK Tactics</div>
+        <a href="{{ url_for('dashboard.mitre_map') }}" class="btn btn-secondary btn-sm" style="font-size:10.5px;padding:3px 8px">View All →</a>
+      </div>
+      <!-- Header row -->
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <span style="font-size:10px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em">Tactic</span>
+        <span style="font-size:10px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em">Techs</span>
+        <span style="font-size:10px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;text-align:right">Count</span>
+      </div>
+      {% set tactic_colors = ['#ff3b3b','#f59e0b','#f59e0b','#22c55e','#3b82f6','#3b82f6','#00d4c8','#00d4c8','#8b5cf6','#8b5cf6'] %}
+      {% for tc in tactic_counts[:10] %}
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:{% if not loop.last %}1px solid var(--border){% else %}none{% endif %}">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="width:6px;height:6px;border-radius:50%;background:{{ tactic_colors[loop.index0 % tactic_colors|length] }};flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:11.5px;color:var(--text)">{{ tc.tactic }}</span>
+        </div>
+        <span style="font-size:10.5px;color:var(--muted2);font-family:var(--font-mono)">—</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text-bright);font-family:var(--font-mono);text-align:right">{{ tc.count }}</span>
+      </div>
+      {% endfor %}
+      {% if not tactic_counts %}
+      <p class="text-muted" style="font-size:12px;padding:8px 0">No MITRE data available.</p>
+      {% endif %}
+    </div>
+
+    <!-- Active Incidents panel -->
+    <div class="card" style="padding:14px 16px;margin-bottom:14px">
+      <div class="card-header">
+        <div class="card-title">Active Incidents</div>
+        <a href="{{ url_for('dashboard.incidents') }}" class="btn btn-secondary btn-sm" style="font-size:10.5px;padding:3px 8px">View All →</a>
+      </div>
+      {% for inc in top_incidents %}
+      {% set p = (inc.priority or 'UNKNOWN')|upper %}
+      {% set score = (inc.risk_score or 0)|round(1) %}
+      <div class="right-incident-item">
+        <div class="right-inc-icon" style="background:{% if p == 'HIGH' %}var(--high-dim){% elif p == 'MEDIUM' %}var(--medium-dim){% else %}var(--low-dim){% endif %}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{% if p == 'HIGH' %}var(--high){% elif p == 'MEDIUM' %}var(--medium){% else %}var(--low){% endif %}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="right-inc-body">
+          <div class="right-inc-title">{{ inc.title or 'Untitled Incident' }}</div>
+          <div class="right-inc-meta">{{ inc.alert_count or 0 }} related alerts · {{ score }} risk score</div>
+        </div>
+        <div class="right-inc-right">
+          <span class="badge badge-{{ p|lower }}" style="font-size:9.5px">{{ p }}</span>
+          <a href="{{ url_for('dashboard.incident_detail', incident_id=inc.id) }}" style="font-size:10px;color:var(--muted2)">View →</a>
+        </div>
+      </div>
+      {% endfor %}
+      {% if not top_incidents %}
+      <p class="text-muted" style="font-size:12px;padding:8px 0">No incidents yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- BLUF panel: Latest/Highest incident -->
+    {% if top_incidents %}
+    {% set top = top_incidents[0] %}
+    {% set tp = (top.priority or 'UNKNOWN')|upper %}
+    <div class="bluf-box" style="margin-bottom:0">
+      <div class="bluf-header">
+        <span class="bluf-label">BLUF — Latest Incident</span>
+        <a href="{{ url_for('dashboard.incidents') }}" class="btn btn-secondary btn-sm" style="font-size:10.5px;padding:3px 8px;margin-left:auto">View All →</a>
+      </div>
+      <div style="margin-bottom:8px">
+        <span class="badge badge-{{ tp|lower }}" style="font-size:9.5px">{{ tp }} PRIORITY</span>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:6px">
+        {{ top.title or 'Untitled Incident' }}
+      </div>
+      <div class="bluf-text" style="font-size:12px">
+        {{ (top.bluf_summary or 'No summary available.')[:220] }}
+      </div>
+      {% if top.bluf_summary %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        <div>
+          <div style="font-size:10px;color:var(--muted2);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Priority</div>
+          <span class="badge badge-{{ tp|lower }}">{{ tp }}</span>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted2);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Recommended Action</div>
+          <div style="font-size:11px;color:var(--text)">Investigate host, isolate if needed, review logs and related activity.</div>
+        </div>
+      </div>
+      {% endif %}
+      <div class="bluf-attribution">
+        {% if top.bluf_source == 'watsonx' %}
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--cyan)"><circle cx="12" cy="12" r="10"/></svg>
+          Source: AI (watsonx)
+        {% else %}
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--muted)"><circle cx="12" cy="12" r="10"/></svg>
+          Source: Template
+        {% endif %}
+        &nbsp;|&nbsp; Generated: {{ top.updated_at.strftime('%b %d %Y %H:%M') if top.updated_at else '—' }}
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /.dash-right -->
+
+</div><!-- /.dash-body -->
+
+{% endif %}{# end if total_alerts #}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+  const PRIORITY_COUNTS = {{ priority_counts | tojson }};
+  const TACTIC_COUNTS   = {{ tactic_counts  | tojson }};
+
+  if (document.getElementById('priorityChart')) {
+    initPriorityChart(PRIORITY_COUNTS);
+    initTacticChart(TACTIC_COUNTS);
+    initSparklines(PRIORITY_COUNTS);
+  }
+
+  startAutoRefresh();
+
+  // Alert row expansion on this page too
+  initAlertTable();
+</script>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}Incident #{{ incident.id }}{% endblock %}
+{% block page_title %}Incident Detail{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('dashboard.incidents') }}" class="btn btn-secondary btn-sm">← Back to Incidents</a>
+{% endblock %}
+
+{% block content %}
+
+{% set p = (incident.priority or 'UNKNOWN')|upper %}
+{% set status = incident.status or 'open' %}
+
+<!-- ===== Incident Header ===== -->
+<div class="card mb-5">
+  <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span class="badge badge-{{ p|lower }}">{{ p }}</span>
+        <span class="badge badge-{{ 'invest' if status == 'investigating' else status }}">{{ status }}</span>
+        {% if incident.bluf_source == 'watsonx' %}
+          <span class="badge badge-watsonx">✦ watsonx AI</span>
+        {% else %}
+          <span class="badge badge-template">Template</span>
+        {% endif %}
+        <span class="font-mono" style="color:var(--muted2);font-size:11px">INC-{{ '%04d' | format(incident.id) }}</span>
+      </div>
+      <h1 style="font-size:17px;font-weight:700;color:var(--text-bright);line-height:1.3;margin-bottom:6px">
+        {{ incident.title or 'Untitled Incident' }}
+      </h1>
+      <div class="font-mono" style="color:var(--muted2);font-size:11px">
+        Created: {{ incident.created_at.strftime('%Y-%m-%d %H:%M UTC') if incident.created_at else '—' }}
+        &nbsp;·&nbsp;
+        Updated: {{ incident.updated_at.strftime('%Y-%m-%d %H:%M UTC') if incident.updated_at else '—' }}
+      </div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:38px;font-weight:900;color:var(--{{ 'high' if (incident.risk_score or 0) >= 70 else ('medium' if (incident.risk_score or 0) >= 40 else 'low') }});line-height:1;font-family:var(--font-ui)">
+        {{ (incident.risk_score or 0)|round(1) }}
+      </div>
+      <div class="font-mono" style="color:var(--muted2);font-size:11px">risk score</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BLUF Summary ===== -->
+<div class="bluf-box mb-5" id="bluf-box">
+  <div class="bluf-header">
+    <span class="bluf-label">BLUF — Bottom Line Up Front</span>
+    <button class="btn btn-secondary btn-sm" id="btn-regen-bluf" data-incident-id="{{ incident.id }}">
+      ↺ Re-generate
+    </button>
+    <div class="spinner hidden" id="bluf-spinner" style="width:14px;height:14px;border-width:2px"></div>
+  </div>
+  <div class="bluf-text" id="bluf-text">
+    {% if incident.bluf_summary %}
+      {{ incident.bluf_summary }}
+    {% else %}
+      <span class="text-muted">No BLUF generated yet. Click "Re-generate" to create one.</span>
+    {% endif %}
+  </div>
+  <div class="bluf-attribution">
+    {% if incident.bluf_source == 'watsonx' %}
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--cyan)"><circle cx="12" cy="12" r="10"/></svg>
+      Source: AI (watsonx)
+    {% else %}
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--muted)"><circle cx="12" cy="12" r="10"/></svg>
+      Source: Template
+    {% endif %}
+    &nbsp;|&nbsp; Generated: {{ incident.updated_at.strftime('%b %d %Y %H:%M') if incident.updated_at else '—' }}
+  </div>
+</div>
+
+<!-- ===== Stats row ===== -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+  <div class="card" style="padding:14px 16px">
+    <div class="card-title">Alert Count</div>
+    <div style="font-size:26px;font-weight:800;color:var(--cyan)">{{ incident.alert_count or 0 }}</div>
+  </div>
+  <div class="card" style="padding:14px 16px">
+    <div class="card-title">Risk Score</div>
+    <div style="font-size:26px;font-weight:800;color:var(--{{ 'high' if (incident.risk_score or 0) >= 70 else ('medium' if (incident.risk_score or 0) >= 40 else 'low') }})">
+      {{ (incident.risk_score or 0)|round(1) }}
+    </div>
+  </div>
+  <div class="card" style="padding:14px 16px">
+    <div class="card-title">MITRE Techniques</div>
+    <div style="padding-top:4px">
+      {% if incident.mitre_techniques %}
+        {% for tech in incident.mitre_techniques.split(',') %}
+          {% set t = tech.strip() %}{% if t %}
+          <span class="tag" style="margin:2px">{{ t }}</span>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <span class="text-muted">None mapped</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card" style="padding:14px 16px">
+    <div class="card-title">Status</div>
+    <div style="padding-top:4px">
+      <span class="badge badge-{{ 'invest' if status == 'investigating' else status }}">{{ status }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Constituent Alerts Timeline ===== -->
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px">
+    Alert Timeline
+    <span style="font-weight:400;color:var(--muted2);text-transform:none;letter-spacing:0;font-size:11.5px;margin-left:6px;font-family:var(--font-ui)">
+      {{ constituent_alerts | length }} alert{{ 's' if constituent_alerts | length != 1 }} · click row to expand
+    </span>
+  </div>
+
+  {% if constituent_alerts %}
+  <div class="timeline">
+    {% for alert in constituent_alerts %}
+    {% set ap = (alert.priority or 'UNKNOWN')|upper %}
+    <div class="timeline-item">
+      <div class="timeline-dot {{ ap|lower }}"></div>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:4px;overflow:hidden">
+        <div class="row-clickable" data-target="tl-detail-{{ alert.id }}"
+             style="display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer"
+             onclick="toggleTimelineDetail('tl-detail-{{ alert.id }}')">
+          <span class="font-mono" style="color:var(--muted2);white-space:nowrap;font-size:11px">
+            {{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') if alert.timestamp else '—' }}
+          </span>
+          <span class="badge badge-{{ ap|lower }}">{{ ap }}</span>
+          <span style="flex:1;font-size:12.5px;color:var(--text)">{{ alert.event_type or '—' }}</span>
+          <code style="font-size:11px">{{ alert.source_ip or '—' }}</code>
+          <span class="text-muted" style="font-size:11px">→</span>
+          <code style="font-size:11px">{{ alert.dest_ip or '—' }}</code>
+          <span class="score-badge score-{{ 'high' if (alert.risk_score or 0) >= 70 else ('medium' if (alert.risk_score or 0) >= 40 else 'low') }}" style="font-size:11px">
+            {{ (alert.risk_score or 0)|round(1) }}
+          </span>
+          {% if alert.is_false_positive %}
+          <span class="badge badge-fp-yes">FP</span>
+          {% endif %}
+          <span class="text-muted" style="font-size:11px;margin-left:4px">▾</span>
+        </div>
+
+        <div id="tl-detail-{{ alert.id }}" class="hidden"
+             style="border-top:1px solid var(--border);padding:14px 16px;background:rgba(0,0,0,0.3)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div class="card-title" style="margin-bottom:6px">Score Breakdown</div>
+              {% if alert.score_breakdown %}
+                <div class="score-grid">
+                  {% for factor, val in alert.score_breakdown.items() %}
+                  <div class="score-factor">
+                    <div class="score-factor-label">{{ factor | replace('_', ' ') }}</div>
+                    <div class="score-factor-value">{{ val }}</div>
+                    <div class="progress-bar">
+                      <div class="progress-fill" style="width:{{ [val, 100] | min }}%"></div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="text-muted" style="font-size:12px">No breakdown</p>
+              {% endif %}
+              {% if alert.mitre_technique_id %}
+              <div style="margin-top:10px">
+                <span class="tag">{{ alert.mitre_technique_id }}</span>
+                <span class="text-muted" style="font-size:11px;margin-left:6px">{{ alert.mitre_technique_name or '' }}</span>
+              </div>
+              {% endif %}
+            </div>
+            <div>
+              <div class="card-title" style="margin-bottom:6px">Raw Data</div>
+              <pre class="json-block" style="max-height:200px">{{ alert.raw_data | tojson(indent=2) if alert.raw_data else '{}' }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">No constituent alerts found.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function toggleTimelineDetail(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden');
+  }
+
+  const btnRegen = document.getElementById('btn-regen-bluf');
+  if (btnRegen) {
+    btnRegen.addEventListener('click', async () => {
+      const incidentId = btnRegen.dataset.incidentId;
+      const spinner = document.getElementById('bluf-spinner');
+      const blufText = document.getElementById('bluf-text');
+      btnRegen.disabled = true;
+      spinner.classList.remove('hidden');
+      try {
+        const res = await fetch(`/api/v1/incidents/${incidentId}/bluf`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok && data.bluf_summary) {
+          blufText.textContent = data.bluf_summary;
+        } else {
+          blufText.textContent = data.error || 'Failed to generate BLUF.';
+        }
+      } catch (e) {
+        blufText.textContent = 'Network error: ' + e.message;
+      } finally {
+        btnRegen.disabled = false;
+        spinner.classList.add('hidden');
+      }
+    });
+  }
+</script>
+{% endblock %}
