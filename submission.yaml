@@ -12,15 +12,15 @@ team:
   name: "Name Yad Nahi"                # REQUIRED — e.g., "Orion Squad"
   track: "AI"                          # REQUIRED — one of: AI | DevOps | Sustainability | Open
   lead:
-    name: "Team Lead"                  # REQUIRED — e.g., "Alice Chen"
-    email: "lead@team.com"             # REQUIRED — e.g., "alice.chen@ibm.com"
+    name: "Arya Raval"                  # REQUIRED — e.g., "Alice Chen"
+    email: "26pgce030@charusat.edu.in"             # REQUIRED — e.g., "alice.chen@ibm.com"
   members:
-    - name: "Member One"               # REQUIRED — Team member 1
-      email: "member1@team.com"
-    - name: "Member Two"
-      email: "member2@team.com"
-    - name: "Member Three"
-      email: "member3@team.com"
+    - name: "Arav Patel "               # REQUIRED — Team member 1
+      email: "26pgce015@charusat.edu.in"
+    - name: "Rudra Tanti"
+      email: "26pgce030@charusat.edu.in"
+    - name: "Salman meman"
+      email: "26pgce012@charusat.edu.in"
 
 submission:
   title: "ThreatIntel Correlator"      # REQUIRED — Project display name
