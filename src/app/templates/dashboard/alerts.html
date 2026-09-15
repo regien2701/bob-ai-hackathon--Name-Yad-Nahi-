@@ -6,14 +6,14 @@
 
 <div class="page-header">
   <h1>Alerts
-    <span style="font-size:13px;font-weight:400;color:var(--muted2);margin-left:8px;font-family:var(--font-mono)">
+    <span style="font-size:12px;font-weight:400;color:var(--muted2);margin-left:8px;font-family:var(--font-mono)">
       {{ pagination.total }} total
     </span>
   </h1>
   <div class="page-subtitle">All ingested alerts with scoring, MITRE mapping, and false-positive detection</div>
 </div>
 
-<!-- ===== Filter bar ===== -->
+<!-- Filter bar -->
 <form method="get" action="{{ url_for('dashboard.alerts') }}">
 <div class="filter-bar">
   <span class="filter-label">Priority</span>
@@ -23,14 +23,12 @@
     <option value="MEDIUM" {% if priority == 'MEDIUM' %}selected{% endif %}>MEDIUM</option>
     <option value="LOW"    {% if priority == 'LOW'    %}selected{% endif %}>LOW</option>
   </select>
-
   <span class="filter-label" style="margin-left:6px">False Positives</span>
   <select name="fp">
     <option value="all"   {% if fp_filter == 'all'   %}selected{% endif %}>All</option>
     <option value="false" {% if fp_filter == 'false' %}selected{% endif %}>Confirmed</option>
     <option value="true"  {% if fp_filter == 'true'  %}selected{% endif %}>FP only</option>
   </select>
-
   <div style="flex:1"></div>
   <button type="submit" class="btn btn-primary btn-sm">Apply</button>
   <a href="{{ url_for('dashboard.alerts') }}" class="btn btn-secondary btn-sm">Reset</a>
@@ -38,28 +36,19 @@
 </form>
 
 {% if alerts %}
-<!-- ===== Alerts table ===== -->
 <div class="table-wrapper">
   <table id="alerts-table">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Timestamp</th>
-        <th>Source IP</th>
-        <th>Dest IP</th>
-        <th>Event Type</th>
-        <th>Severity</th>
-        <th>Score</th>
-        <th>Priority</th>
-        <th>FP</th>
-        <th>MITRE</th>
+        <th>ID</th><th>Timestamp</th><th>Source IP</th><th>Dest IP</th>
+        <th>Event Type</th><th>Severity</th><th>Score</th><th>Priority</th><th>FP</th><th>MITRE</th>
       </tr>
     </thead>
     <tbody>
       {% for alert in alerts %}
       <tr class="row-clickable" data-alert-id="{{ alert.id }}" data-expanded="false">
         <td class="font-mono" style="color:var(--muted2)">A-{{ alert.id }}</td>
-        <td class="font-mono" style="color:var(--muted2);white-space:nowrap;font-size:11.5px">
+        <td class="font-mono" style="color:var(--muted2);white-space:nowrap;font-size:11px">
           {{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') if alert.timestamp else '—' }}
         </td>
         <td><code>{{ alert.source_ip or '—' }}</code></td>
@@ -68,9 +57,7 @@
         <td style="color:var(--muted2)">{{ alert.severity_raw or '—' }}</td>
         <td>
           {% set score = (alert.risk_score or 0)|round(1) %}
-          <span class="score-badge score-{{ 'high' if score >= 70 else ('medium' if score >= 40 else 'low') }}">
-            {{ score }}
-          </span>
+          <span class="score-badge score-{{ 'high' if score >= 70 else ('medium' if score >= 40 else 'low') }}">{{ score }}</span>
         </td>
         <td>
           {% set p = (alert.priority or 'UNKNOWN')|upper %}
@@ -78,62 +65,50 @@
         </td>
         <td>
           {% if alert.is_false_positive %}
-            <span class="badge badge-fp-yes" title="{{ alert.fp_reason or '' }}">FP</span>
+            <span class="badge-fp-yes" title="{{ alert.fp_reason or '' }}">FP</span>
           {% else %}
-            <span class="badge badge-fp-no">OK</span>
+            <span class="badge-fp-no">OK</span>
           {% endif %}
         </td>
         <td>
           {% if alert.mitre_technique_id %}
             <span class="tag" title="{{ alert.mitre_technique_name or '' }}">{{ alert.mitre_technique_id }}</span>
-          {% else %}
-            <span class="text-muted">—</span>
-          {% endif %}
+          {% else %}<span class="text-muted">—</span>{% endif %}
         </td>
       </tr>
-      <!-- Detail row (hidden until row is clicked) -->
       <tr class="detail-row hidden" id="detail-row-{{ alert.id }}">
         <td colspan="10">
           <div class="detail-panel" id="detail-panel-{{ alert.id }}">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap">
-              <!-- Score breakdown -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
               <div>
-                <div class="card-title" style="margin-bottom:8px">Score Breakdown</div>
+                <div class="card-title" style="margin-bottom:7px">Score Breakdown</div>
                 {% if alert.score_breakdown %}
                   <div class="score-grid">
                     {% for factor, val in alert.score_breakdown.items() %}
                     <div class="score-factor">
                       <div class="score-factor-label">{{ factor | replace('_', ' ') }}</div>
                       <div class="score-factor-value">{{ val }}</div>
-                      <div class="progress-bar">
-                        <div class="progress-fill" style="width:{{ [val, 100] | min }}%"></div>
-                      </div>
+                      <div class="progress-bar"><div class="progress-fill" style="width:{{ [val, 100] | min }}%"></div></div>
                     </div>
                     {% endfor %}
                   </div>
-                {% else %}
-                  <p class="text-muted" style="font-size:12px">No breakdown available</p>
-                {% endif %}
-
+                {% else %}<p class="text-muted" style="font-size:11px">No breakdown available</p>{% endif %}
                 {% if alert.mitre_technique_id %}
-                <div style="margin-top:12px">
-                  <div class="card-title" style="margin-bottom:6px">MITRE ATT&amp;CK</div>
+                <div style="margin-top:10px">
+                  <div class="card-title" style="margin-bottom:5px">MITRE ATT&amp;CK</div>
                   <span class="tag">{{ alert.mitre_technique_id }}</span>
-                  <span class="text-muted" style="font-size:12px;margin-left:6px">{{ alert.mitre_technique_name or '' }}</span>
+                  <span class="text-muted" style="font-size:11px;margin-left:6px">{{ alert.mitre_technique_name or '' }}</span>
                 </div>
                 {% endif %}
-
                 {% if alert.fp_reason %}
-                <div style="margin-top:12px">
+                <div style="margin-top:10px">
                   <div class="card-title" style="margin-bottom:4px">FP Reason</div>
-                  <p style="font-size:12px;color:var(--medium)">{{ alert.fp_reason }}</p>
+                  <p style="font-size:11.5px;color:var(--medium)">{{ alert.fp_reason }}</p>
                 </div>
                 {% endif %}
               </div>
-
-              <!-- Raw data JSON -->
               <div>
-                <div class="card-title" style="margin-bottom:8px">Raw Data</div>
+                <div class="card-title" style="margin-bottom:7px">Raw Data</div>
                 <pre class="json-block">{{ alert.raw_data | tojson(indent=2) if alert.raw_data else '{}' }}</pre>
               </div>
             </div>
@@ -145,7 +120,7 @@
   </table>
 </div>
 
-<!-- ===== Pagination ===== -->
+<!-- Pagination -->
 <div class="pagination">
   <span class="page-info">
     Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }}–{{ [pagination.page * pagination.per_page, pagination.total] | min }}
@@ -183,7 +158,5 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-<script>
-  initAlertTable();
-</script>
+<script>initAlertTable();</script>
 {% endblock %}

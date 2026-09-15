@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Data Ingestion{% endblock %}
-{% block page_title %}Data Ingestion{% endblock %}
+{% block title %}Upload Data{% endblock %}
+{% block page_title %}Upload Data{% endblock %}
 
 {% block content %}
 <div class="upload-area">
@@ -23,7 +23,7 @@
   <div class="upload-progress" id="upload-progress">
     <div class="flex items-center gap-2 mb-2">
       <div class="spinner"></div>
-      <span style="color:var(--muted2);font-size:13px;font-family:var(--font-mono)" id="progress-label">Uploading…</span>
+      <span style="color:var(--muted);font-size:13px" id="progress-label">Uploading…</span>
     </div>
     <div class="progress-bar-upload">
       <div class="fill" id="progress-fill"></div>
@@ -34,11 +34,11 @@
   <div class="upload-result" id="upload-result">
     <div class="card">
       <div class="flex items-center gap-2 mb-4">
-        <span style="font-size:18px;color:var(--low)">✓</span>
-        <div class="card-title" style="margin-bottom:0;color:var(--low)">Ingestion Complete</div>
+        <span style="font-size:20px">✓</span>
+        <div class="card-title" style="margin-bottom:0">Ingestion Complete</div>
       </div>
       <div class="result-stats" id="result-stats"></div>
-      <div style="margin-top:14px">
+      <div style="margin-top:16px">
         <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">View Dashboard →</a>
         <a href="{{ url_for('dashboard.alerts') }}" class="btn btn-secondary" style="margin-left:8px">Browse Alerts</a>
       </div>
@@ -51,10 +51,10 @@
   </div>
 
   <!-- ===== Sample data ===== -->
-  <div style="text-align:center;margin:24px 0 18px">
-    <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:18px">
+  <div style="text-align:center;margin:28px 0 20px">
+    <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px">
       <div style="flex:1;height:1px;background:var(--border)"></div>
-      <span style="color:var(--muted2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-mono)">or</span>
+      <span style="color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">or</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
     <button class="btn btn-primary btn-lg" id="btn-load-sample">
@@ -68,7 +68,7 @@
   <!-- ===== Format guide ===== -->
   <div class="format-guide">
     <h4>Expected CSV Columns</h4>
-    <p style="color:var(--muted2);font-size:12px;margin-bottom:10px">
+    <p style="color:var(--muted);font-size:12px;margin-bottom:10px">
       All fields are optional except <code>event_type</code>. Missing fields fall back to safe defaults.
     </p>
     <div style="margin-bottom:8px">

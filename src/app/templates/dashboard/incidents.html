@@ -6,93 +6,62 @@
 
 <div class="page-header">
   <h1>Incidents
-    <span style="font-size:13px;font-weight:400;color:var(--muted2);margin-left:8px;font-family:var(--font-mono)">
+    <span style="font-size:12px;font-weight:400;color:var(--muted2);margin-left:8px;font-family:var(--font-mono)">
       {{ pagination.total }} total
     </span>
   </h1>
   <div class="page-subtitle">Correlated incident groups, ranked by risk score</div>
 </div>
 
-<!-- ===== Priority tabs ===== -->
+<!-- Priority tabs -->
 <div class="tab-bar">
-  <a class="tab {% if not priority %}active{% endif %}" href="{{ url_for('dashboard.incidents') }}">
-    All
-  </a>
+  <a class="tab {% if not priority %}active{% endif %}" href="{{ url_for('dashboard.incidents') }}">All</a>
   <a class="tab {% if priority == 'HIGH' %}active{% endif %}"
      href="{{ url_for('dashboard.incidents', priority='HIGH') }}"
-     style="{% if priority == 'HIGH' %}color:var(--high){% endif %}">
-    HIGH
-  </a>
+     style="{% if priority == 'HIGH' %}color:var(--high){% endif %}">HIGH</a>
   <a class="tab {% if priority == 'MEDIUM' %}active{% endif %}"
      href="{{ url_for('dashboard.incidents', priority='MEDIUM') }}"
-     style="{% if priority == 'MEDIUM' %}color:var(--medium){% endif %}">
-    MEDIUM
-  </a>
+     style="{% if priority == 'MEDIUM' %}color:var(--medium){% endif %}">MEDIUM</a>
   <a class="tab {% if priority == 'LOW' %}active{% endif %}"
      href="{{ url_for('dashboard.incidents', priority='LOW') }}"
-     style="{% if priority == 'LOW' %}color:var(--low){% endif %}">
-    LOW
-  </a>
+     style="{% if priority == 'LOW' %}color:var(--cyan){% endif %}">LOW</a>
 </div>
 
 {% if incidents %}
-
-<!-- ===== Card grid ===== -->
 <div class="incidents-grid">
   {% for inc in incidents %}
   {% set p = (inc.priority or 'UNKNOWN')|upper %}
-  <div class="incident-card priority-{{ p|lower }}">
-    <!-- Priority color strip -->
+  <div class="incident-card {% if p == 'HIGH' %}ic-high{% endif %}">
     <div class="incident-card-strip strip-{{ p|lower }}"></div>
     <div class="incident-card-body">
-
-      <!-- Title -->
       <div class="incident-title">{{ inc.title or 'Untitled Incident' }}</div>
-
-      <!-- Meta row: priority badge + score + alerts + status -->
       <div class="incident-meta">
         <span class="badge badge-{{ p|lower }}">{{ p }}</span>
         {% set status = inc.status or 'open' %}
         <span class="badge badge-{{ 'invest' if status == 'investigating' else status }}">{{ status }}</span>
-        <span class="text-muted2" style="font-size:11.5px">{{ inc.alert_count or 0 }} alert{{ 's' if (inc.alert_count or 0) != 1 }}</span>
+        <span style="font-size:11px;color:var(--muted2)">{{ inc.alert_count or 0 }} alert{{ 's' if (inc.alert_count or 0) != 1 }}</span>
       </div>
-
-      <!-- Risk score -->
       <div class="incident-score text-{{ 'high' if (inc.risk_score or 0) >= 70 else ('medium' if (inc.risk_score or 0) >= 40 else 'low') }}">
-        {{ (inc.risk_score or 0) | round(1) }}<span style="font-size:13px;font-weight:400;color:var(--muted)">/100</span>
+        {{ (inc.risk_score or 0) | round(1) }}<span style="font-size:12px;font-weight:400;color:var(--muted)">/100</span>
       </div>
-
-      <!-- MITRE technique tags -->
       {% if inc.mitre_techniques %}
       <div class="technique-tags">
         {% for tech in inc.mitre_techniques.split(',') %}
-          {% set t = tech.strip() %}
-          {% if t %}
-          <span class="tag">{{ t }}</span>
-          {% endif %}
+          {% set t = tech.strip() %}{% if t %}<span class="tag">{{ t }}</span>{% endif %}
         {% endfor %}
       </div>
       {% endif %}
-
-      <!-- BLUF preview -->
       {% if inc.bluf_summary %}
       <div class="incident-bluf">{{ inc.bluf_summary[:120] }}</div>
       {% endif %}
-
-      <!-- View link -->
-      <a href="{{ url_for('dashboard.incident_detail', incident_id=inc.id) }}" class="btn btn-secondary btn-sm">
-        View Details →
-      </a>
+      <a href="{{ url_for('dashboard.incident_detail', incident_id=inc.id) }}" class="btn btn-secondary btn-sm">View Details →</a>
     </div>
   </div>
   {% endfor %}
 </div>
 
-<!-- ===== Pagination ===== -->
 <div class="pagination">
-  <span class="page-info">
-    Page {{ pagination.page }} of {{ pagination.pages }} &nbsp;·&nbsp; {{ pagination.total }} incidents
-  </span>
+  <span class="page-info">Page {{ pagination.page }} of {{ pagination.pages }} · {{ pagination.total }} incidents</span>
   <a class="page-link {% if not pagination.has_prev %}disabled{% endif %}"
      href="?page={{ pagination.prev_num }}&priority={{ priority }}">‹</a>
   {% for p_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}

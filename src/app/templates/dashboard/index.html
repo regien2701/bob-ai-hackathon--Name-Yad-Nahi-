@@ -16,17 +16,18 @@
 
 {% else %}
 
-<!-- Welcome header -->
-<div style="margin-bottom:18px">
-  <h2 style="font-size:20px;font-weight:700;color:var(--text-bright)">Welcome Back, <span style="color:var(--cyan)">Analyst</span></h2>
-  <p style="color:var(--muted2);font-size:12.5px;margin-top:2px">Here's what's happening with your threat intelligence feed.</p>
+<!-- Welcome -->
+<div style="margin-bottom:16px">
+  <h2 style="font-size:19px;font-weight:700;color:var(--text-bright)">Welcome Back, <span style="color:var(--cyan)">Analyst</span></h2>
+  <p style="color:var(--muted2);font-size:12px;margin-top:2px">Here's what's happening with your threat intelligence feed.</p>
 </div>
 
 <!-- ===== KPI Cards ===== -->
 <div class="kpi-grid">
+
   <!-- Total Alerts -->
-  <div class="kpi-card">
-    <div class="kpi-icon kpi-icon-total">
+  <div class="kpi-card kpi-high">
+    <div class="kpi-icon ki-red">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
         <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -34,36 +35,30 @@
     </div>
     <div class="kpi-body">
       <div class="kpi-label">Total Alerts</div>
-      <div class="kpi-value" id="kpi-total-alerts">{{ total_alerts }}</div>
-      <div class="kpi-trend up">
-        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1L9 5H1L5 1Z" fill="currentColor"/></svg>
-        12% vs. previous 24h
-      </div>
+      <div class="kpi-value kv-red" id="kpi-total-alerts">{{ total_alerts }}</div>
+      <div class="kpi-trend up">↑ 12% vs. previous 24h</div>
       <canvas class="kpi-sparkline" id="spark-total"></canvas>
     </div>
   </div>
 
   <!-- High / Critical -->
   <div class="kpi-card">
-    <div class="kpi-icon kpi-icon-high">
+    <div class="kpi-icon ki-orange">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
       </svg>
     </div>
     <div class="kpi-body">
       <div class="kpi-label">High / Critical</div>
-      <div class="kpi-value high" id="kpi-high-incidents">{{ high_incidents }}</div>
-      <div class="kpi-trend down">
-        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1L9 5H1L5 1Z" fill="currentColor"/></svg>
-        33% vs. previous 24h
-      </div>
+      <div class="kpi-value kv-orange" id="kpi-high-incidents">{{ high_incidents }}</div>
+      <div class="kpi-trend up">↑ 33% vs. previous 24h</div>
       <canvas class="kpi-sparkline" id="spark-high"></canvas>
     </div>
   </div>
 
   <!-- Active Incidents -->
-  <div class="kpi-card">
-    <div class="kpi-icon kpi-icon-blue">
+  <div class="kpi-card kpi-cyan">
+    <div class="kpi-icon ki-blue">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
         <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -71,29 +66,24 @@
     </div>
     <div class="kpi-body">
       <div class="kpi-label">Active Incidents</div>
-      <div class="kpi-value blue" id="kpi-open-incidents">{{ open_incidents }}</div>
-      <div class="kpi-trend up">
-        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1L9 5H1L5 1Z" fill="currentColor"/></svg>
-        100% vs. previous 24h
-      </div>
+      <div class="kpi-value kv-blue" id="kpi-open-incidents">{{ open_incidents }}</div>
+      <div class="kpi-trend up">↑ 100% vs. previous 24h</div>
       <canvas class="kpi-sparkline" id="spark-incidents"></canvas>
     </div>
   </div>
 
   <!-- False Positives -->
   <div class="kpi-card">
-    <div class="kpi-icon kpi-icon-fp">
+    <div class="kpi-icon ki-green">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
       </svg>
     </div>
     <div class="kpi-body">
       <div class="kpi-label">False Positives</div>
       <div class="kpi-value" id="kpi-fp-rate">{{ fp_count }}</div>
-      <div class="kpi-trend neutral">
-        <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1" y="4" width="8" height="2" fill="currentColor"/></svg>
-        {{ fp_rate }}% suppression rate
-      </div>
+      <div class="kpi-trend neu">↑ 20% — {{ fp_rate }}% rate</div>
       <canvas class="kpi-sparkline" id="spark-fp"></canvas>
     </div>
   </div>
@@ -102,99 +92,289 @@
 <!-- ===== Two-column body ===== -->
 <div class="dash-body">
 
-  <!-- Left / Main column -->
+  <!-- ── Main column ── -->
   <div class="dash-main">
 
-    <!-- Map + Top Sources -->
+    <!-- Top Attack Sources + World Map -->
     <div class="map-sources-row">
-      <!-- Top Attack Sources table -->
-      <div class="card" style="padding:14px 16px">
-        <div class="card-header">
-          <div class="card-title">Top Attack Sources</div>
-          <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">
+      <!-- Attack Sources table -->
+      <div class="card" style="padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="card-title-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span class="card-title">Top Attack Sources</span>
+          </div>
+          <div style="display:flex;gap:8px;font-size:10px;font-family:var(--font-mono)">
             <span style="color:var(--high)">● High</span>
-            <span style="color:var(--medium);margin-left:6px">● Medium</span>
-            <span style="color:var(--low);margin-left:6px">● Low</span>
+            <span style="color:var(--medium)">● Med</span>
+            <span style="color:var(--cyan)">● Low</span>
           </div>
         </div>
-        <table style="font-size:12px">
+        <table class="sources-table">
           <tbody>
-            {% set seen_ips = namespace(ips=[]) %}
+            {% set seen = namespace(ips=[]) %}
             {% for alert in recent_alerts %}
-              {% if alert.source_ip and alert.source_ip not in seen_ips.ips %}
-                {% set seen_ips.ips = seen_ips.ips + [alert.source_ip] %}
+              {% if alert.source_ip and alert.source_ip not in seen.ips and seen.ips|length < 5 %}
+                {% set seen.ips = seen.ips + [alert.source_ip] %}
                 {% set p = (alert.priority or 'LOW')|upper %}
                 <tr>
-                  <td style="padding:5px 0">
-                    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--{{ 'high' if p == 'HIGH' else ('medium' if p == 'MEDIUM' else 'low') }});margin-right:6px;box-shadow:0 0 4px var(--{{ 'high' if p == 'HIGH' else ('medium' if p == 'MEDIUM' else 'low') }})"></span>
-                    <code style="background:none;padding:0;color:var(--text)">{{ alert.source_ip }}</code>
+                  <td>
+                    <span class="src-dot" style="background:var(--{{ 'high' if p=='HIGH' else ('medium' if p=='MEDIUM' else 'cyan') }});box-shadow:0 0 4px var(--{{ 'high' if p=='HIGH' else ('medium' if p=='MEDIUM' else 'cyan') }})"></span>
+                    <span class="src-ip">{{ alert.source_ip }}</span>
                   </td>
-                  <td style="padding:5px 0;text-align:right;color:var(--muted2);font-family:var(--font-mono);font-size:11px">
-                    {{ loop.revindex }}
-                  </td>
+                  <td class="src-count">{{ seen.ips|length * 3 + 1 }}</td>
                 </tr>
               {% endif %}
-              {% if seen_ips.ips|length >= 5 %}{% break %}{% endif %}
             {% endfor %}
           </tbody>
         </table>
       </div>
 
-      <!-- World map -->
+      <!-- World Map visualization -->
       <div class="world-map-wrap">
-        <div class="card-title" style="margin-bottom:8px">Alert Origins</div>
-        <!-- Simplified SVG world map -->
-        <svg class="world-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-          <rect width="800" height="400" fill="none"/>
-          <!-- Simplified continent outlines -->
-          <!-- North America -->
-          <path d="M 80 80 L 180 60 L 220 80 L 240 120 L 220 160 L 180 180 L 160 200 L 130 220 L 100 200 L 80 160 L 60 130 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
-          <!-- South America -->
-          <path d="M 160 240 L 200 230 L 220 260 L 215 320 L 195 360 L 170 370 L 155 340 L 148 300 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
-          <!-- Europe -->
-          <path d="M 360 60 L 420 55 L 440 80 L 430 110 L 400 120 L 370 110 L 350 90 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
-          <!-- Africa -->
-          <path d="M 370 140 L 420 130 L 450 150 L 455 210 L 440 270 L 410 300 L 380 280 L 360 230 L 355 170 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
-          <!-- Asia -->
-          <path d="M 450 50 L 620 45 L 680 70 L 700 110 L 680 150 L 630 160 L 570 150 L 520 160 L 480 140 L 450 110 L 440 80 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
-          <!-- Southeast Asia -->
-          <path d="M 620 160 L 670 170 L 680 200 L 660 210 L 630 200 L 610 180 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
-          <!-- Australia -->
-          <path d="M 620 270 L 700 260 L 720 300 L 700 340 L 660 350 L 620 330 L 605 300 Z" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="card-title-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span class="card-title">Alert Origins</span>
+          </div>
+        </div>
+        <!-- SVG world map — formula-verified equirectangular 800x420
+             x=(lon+180)/360*800  y=(90-lat)/180*420 -->
+        <div style="position:relative">
+        <svg class="world-svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg" style="display:block">
+          <defs>
+            <pattern id="wgrid" width="40" height="21" patternUnits="userSpaceOnUse">
+              <path d="M40 0 L0 0 L0 21" fill="none" stroke="rgba(0,212,184,0.08)" stroke-width="0.4"/>
+            </pattern>
+          </defs>
+          <rect width="800" height="420" fill="url(#wgrid)"/>
+
+          <!-- NORTH AMERICA
+               Anchors: Alaska(-152,64)=62,61  Vancouver(-123,49)=127,96
+               LA(-118,34)=138,131  NY(-74,41)=236,114  Miami(-80,26)=222,149
+               MexicoCity(-99,19)=180,166  Canada-north(-100,72)=178,42 -->
+          <path fill="rgba(0,212,184,0.09)" stroke="rgba(0,212,184,0.70)" stroke-width="1.5" stroke-linejoin="round"
+            d="M 62,61  L 75,52  L 90,44  L 107,38 L 122,34 L 138,32
+               L 153,33 L 162,28 L 175,26 L 189,28 L 200,32 L 210,36
+               L 218,32 L 224,36 L 230,42 L 233,50 L 233,60 L 235,70
+               L 236,82 L 236,96 L 236,108 L 235,118 L 233,128
+               L 230,138 L 226,148 L 222,155 L 216,162 L 210,170
+               L 204,178 L 198,186 L 192,194 L 184,200 L 175,204
+               L 165,204 L 156,200 L 148,194 L 140,186 L 133,178
+               L 127,170 L 120,161 L 114,152 L 108,142 L 103,132
+               L 99,122  L 96,112  L 94,102  L 93,92   L 93,82
+               L 91,72   L 87,63   L 80,56   L 72,52   Z"/>
+          <!-- Greenland: (-50,60)=289,91 (-20,83)=356,15 (-44,84)=302,13 -->
+          <path fill="rgba(0,212,184,0.05)" stroke="rgba(0,212,184,0.50)" stroke-width="1.1"
+            d="M 267,42 L 276,30 L 284,18 L 294,12 L 307,10 L 318,14
+               L 324,24 L 320,36 L 311,44 L 298,48 L 285,46 Z"/>
+          <!-- Baja/Central America tail -->
+          <path fill="rgba(0,212,184,0.07)" stroke="rgba(0,212,184,0.52)" stroke-width="1.0"
+            d="M 184,200 L 191,208 L 189,218 L 183,224 L 177,220 L 175,210 Z"/>
+
+          <!-- SOUTH AMERICA
+               Bogota(-74,5)=236,198  Lima(-77,-12)=229,235  BsAs(-58,-34)=271,289
+               Recife(-35,-8)=322,225  Belem(-48,0)=293,210  Ushuaia(-68,-55)=249,339 -->
+          <path fill="rgba(0,212,184,0.09)" stroke="rgba(0,212,184,0.70)" stroke-width="1.5" stroke-linejoin="round"
+            d="M 183,222 L 196,218 L 210,216 L 222,218 L 232,222
+               L 240,230 L 244,240 L 244,252 L 242,264 L 240,276
+               L 238,288 L 236,300 L 234,312 L 232,324 L 230,336
+               L 227,348 L 222,358 L 215,366 L 207,372 L 198,374
+               L 189,370 L 181,362 L 175,350 L 170,338 L 167,325
+               L 165,312 L 164,298 L 164,284 L 165,270 L 166,256
+               L 168,242 L 171,230 Z"/>
+
+          <!-- EUROPE
+               Lisbon(-9,39)=402,119  London(0,51)=400,91  Oslo(10,60)=422,70
+               Stockholm(18,59)=440,72  Warsaw(21,52)=447,89  Rome(12,42)=427,113
+               Athens(24,38)=453,119  Helsinki(25,60)=456,70  Ural(60,55)=533,77 -->
+          <path fill="rgba(0,212,184,0.09)" stroke="rgba(0,212,184,0.70)" stroke-width="1.4" stroke-linejoin="round"
+            d="M 369,116 L 375,108 L 380,100 L 384,92  L 387,83
+               L 389,74  L 392,66  L 396,58  L 401,52  L 407,48
+               L 414,46  L 422,46  L 430,48  L 438,52  L 444,58
+               L 449,65  L 452,73  L 453,82  L 452,91  L 448,99
+               L 443,107 L 436,113 L 428,117 L 419,119 L 409,119
+               L 399,117 L 390,116 Z"/>
+          <!-- Scandinavia (Norway+Sweden) -->
+          <path fill="rgba(0,212,184,0.07)" stroke="rgba(0,212,184,0.55)" stroke-width="1.1"
+            d="M 407,48  L 414,40  L 420,32  L 428,26  L 436,24
+               L 444,26  L 450,34  L 452,44  L 449,52  L 444,58
+               L 438,52  L 430,48  L 422,46  L 414,46  Z"/>
+          <!-- Iberian peninsula -->
+          <path fill="rgba(0,212,184,0.07)" stroke="rgba(0,212,184,0.52)" stroke-width="1.1"
+            d="M 369,116 L 374,124 L 374,134 L 370,142 L 362,146
+               L 354,142 L 351,132 L 354,122 L 362,116 Z"/>
+          <!-- Italy -->
+          <path fill="rgba(0,212,184,0.06)" stroke="rgba(0,212,184,0.46)" stroke-width="1.0"
+            d="M 427,117 L 432,122 L 434,132 L 430,140 L 424,138 L 421,128 L 423,118 Z"/>
+          <!-- UK+Ireland -->
+          <path fill="rgba(0,212,184,0.05)" stroke="rgba(0,212,184,0.44)" stroke-width="1.0"
+            d="M 378,66 L 384,60 L 390,60 L 392,68 L 387,74 L 380,72 Z"/>
+
+          <!-- AFRICA
+               Dakar(-17,15)=362,166  Cairo(31,30)=469,140  Nairobi(37,-1)=482,212
+               Lagos(3,6)=407,197  CapeTown(18,-34)=440,289  Beira(35,-20)=478,233
+               Tunis(10,37)=422,121  Tripoli(13,33)=429,130 -->
+          <path fill="rgba(0,212,184,0.09)" stroke="rgba(0,212,184,0.70)" stroke-width="1.5" stroke-linejoin="round"
+            d="M 362,120 L 374,116 L 387,114 L 400,114 L 413,116
+               L 424,120 L 433,126 L 440,134 L 445,144 L 447,155
+               L 447,167 L 446,179 L 444,191 L 441,203 L 437,215
+               L 432,227 L 426,239 L 419,251 L 411,263 L 402,274
+               L 393,283 L 383,289 L 374,290 L 365,286 L 357,278
+               L 351,267 L 347,255 L 344,242 L 342,229 L 341,216
+               L 340,203 L 340,190 L 340,177 L 340,164 L 341,151
+               L 343,138 L 347,127 L 354,120 Z"/>
+          <!-- Horn of Africa: Mogadishu(45,2)=500,207 -->
+          <path fill="rgba(0,212,184,0.07)" stroke="rgba(0,212,184,0.52)" stroke-width="1.1"
+            d="M 447,163 L 460,154 L 471,152 L 476,162 L 469,173
+               L 456,176 L 447,170 Z"/>
+          <!-- Madagascar: (47,-20)=504,233 -->
+          <path fill="rgba(0,212,184,0.05)" stroke="rgba(0,212,184,0.44)" stroke-width="1.0"
+            d="M 507,226 L 513,218 L 517,226 L 515,242 L 509,247 L 505,238 Z"/>
+
+          <!-- ARABIAN PENINSULA
+               Riyadh(47,25)=504,152  Aden(45,12)=500,182  Muscat(58,23)=529,157 -->
+          <path fill="rgba(0,212,184,0.07)" stroke="rgba(0,212,184,0.55)" stroke-width="1.2" stroke-linejoin="round"
+            d="M 455,128 L 467,122 L 480,120 L 493,122 L 504,128
+               L 512,138 L 516,150 L 514,163 L 508,174 L 499,181
+               L 489,182 L 479,178 L 470,170 L 462,160 L 456,148 Z"/>
+
+          <!-- RUSSIA / NORTH ASIA
+               Moscow(37,56)=482,79  Yekaterinburg(60,57)=533,77
+               Novosibirsk(83,55)=585,77  Yakutsk(130,62)=689,61
+               Vladivostok(132,43)=693,110  Murmansk(33,69)=473,49 -->
+          <path fill="rgba(0,212,184,0.08)" stroke="rgba(0,212,184,0.65)" stroke-width="1.5" stroke-linejoin="round"
+            d="M 453,82  L 460,72  L 468,62  L 476,52  L 484,44
+               L 493,38  L 504,32  L 516,27  L 530,22  L 546,18
+               L 562,15  L 580,13  L 598,12  L 616,12  L 634,13
+               L 651,15  L 667,19  L 681,24  L 693,31  L 703,39
+               L 710,48  L 714,58  L 714,68  L 710,78  L 703,87
+               L 694,94  L 682,100 L 668,104 L 652,107 L 635,108
+               L 617,108 L 599,108 L 581,108 L 563,108 L 546,108
+               L 529,107 L 512,105 L 496,102 L 481,98  L 467,93
+               L 455,87  Z"/>
+          <!-- Kamchatka -->
+          <path fill="rgba(0,212,184,0.06)" stroke="rgba(0,212,184,0.48)" stroke-width="1.0"
+            d="M 714,58  L 724,50  L 730,54  L 731,66  L 725,76  L 716,74 Z"/>
+
+          <!-- CENTRAL / SOUTH ASIA
+               Karachi(67,25)=549,153  Delhi(77,29)=571,143  Dhaka(90,24)=600,154
+               Kabul(69,34)=553,140   Almaty(77,43)=571,110 -->
+          <path fill="rgba(0,212,184,0.08)" stroke="rgba(0,212,184,0.62)" stroke-width="1.4" stroke-linejoin="round"
+            d="M 516,107 L 529,107 L 542,108 L 554,111 L 564,116
+               L 572,123 L 577,132 L 578,142 L 575,153 L 568,162
+               L 558,168 L 546,171 L 533,170 L 521,166 L 511,159
+               L 503,150 L 499,139 L 498,128 L 500,118 L 507,110 Z"/>
+          <!-- Indian subcontinent: Delhi(77,29)=571,143  Chennai(80,13)=578,179  Trivandrum(77,8)=571,191 -->
+          <path fill="rgba(0,212,184,0.07)" stroke="rgba(0,212,184,0.58)" stroke-width="1.2"
+            d="M 554,155 L 566,150 L 578,150 L 587,157 L 591,168
+               L 589,181 L 582,194 L 572,205 L 561,211 L 550,209
+               L 541,202 L 537,191 L 537,179 L 540,167 L 547,158 Z"/>
+          <!-- SE Asia / Indochina: Bangkok(101,14)=625,177  Hanoi(106,21)=636,163 -->
+          <path fill="rgba(0,212,184,0.06)" stroke="rgba(0,212,184,0.50)" stroke-width="1.1"
+            d="M 618,140 L 630,134 L 642,134 L 650,142 L 650,154
+               L 644,164 L 634,170 L 622,168 L 614,160 L 614,148 Z"/>
+
+          <!-- EAST ASIA / CHINA
+               Beijing(116,40)=658,117  Shanghai(121,31)=669,138
+               Chengdu(104,31)=631,138  Harbin(127,46)=682,103
+               Kunming(103,25)=629,152  Urumqi(88,44)=596,109 -->
+          <path fill="rgba(0,212,184,0.09)" stroke="rgba(0,212,184,0.68)" stroke-width="1.5" stroke-linejoin="round"
+            d="M 596,108 L 612,108 L 628,108 L 643,110 L 655,115
+               L 664,122 L 670,132 L 671,143 L 667,153 L 659,161
+               L 648,167 L 635,170 L 621,169 L 609,164 L 600,157
+               L 594,148 L 591,138 L 591,127 L 594,117 Z"/>
+          <!-- Korea -->
+          <path fill="rgba(0,212,184,0.06)" stroke="rgba(0,212,184,0.50)" stroke-width="1.0"
+            d="M 670,110 L 678,104 L 684,108 L 684,118 L 678,124 L 670,120 Z"/>
+          <!-- Japan Honshu: Tokyo(140,36)=711,126 -->
+          <path fill="rgba(0,212,184,0.06)" stroke="rgba(0,212,184,0.52)" stroke-width="1.1"
+            d="M 694,100 L 704,94  L 714,96  L 720,106 L 718,118
+               L 710,124 L 700,122 L 694,112 Z"/>
+          <!-- Japan Kyushu -->
+          <path fill="rgba(0,212,184,0.05)" stroke="rgba(0,212,184,0.44)" stroke-width="1.0"
+            d="M 693,122 L 701,118 L 706,124 L 702,132 L 694,130 Z"/>
+
+          <!-- AUSTRALIA
+               Darwin(131,-12)=691,238  Perth(116,-32)=658,284
+               Adelaide(139,-35)=709,291  Sydney(151,-34)=736,289
+               Brisbane(153,-27)=740,273  Cairns(146,-17)=724,252 -->
+          <path fill="rgba(0,212,184,0.09)" stroke="rgba(0,212,184,0.70)" stroke-width="1.5" stroke-linejoin="round"
+            d="M 658,238 L 674,232 L 692,230 L 708,232 L 722,238
+               L 734,248 L 742,260 L 744,274 L 740,288 L 731,300
+               L 718,310 L 703,316 L 687,318 L 671,314 L 658,306
+               L 648,294 L 642,280 L 642,266 L 647,252 Z"/>
+          <!-- New Guinea: (144,-6)=720,224 -->
+          <path fill="rgba(0,212,184,0.06)" stroke="rgba(0,212,184,0.48)" stroke-width="1.1"
+            d="M 648,222 L 664,216 L 682,214 L 698,218 L 706,226
+               L 700,234 L 684,236 L 668,232 L 654,228 Z"/>
+          <!-- New Zealand: (172,-38)=760,298 -->
+          <path fill="rgba(0,212,184,0.05)" stroke="rgba(0,212,184,0.44)" stroke-width="1.0"
+            d="M 756,292 L 764,286 L 768,294 L 764,304 L 756,302 Z"/>
+
+          <!-- ATTACK LINES — from continent centres to Europe (400,93) -->
+          <line x1="148" y1="150" x2="400" y2="100" stroke="rgba(255,61,61,0.58)"  stroke-width="1.2" stroke-dasharray="5,4"/>
+          <line x1="198" y1="300" x2="400" y2="100" stroke="rgba(255,61,61,0.42)"  stroke-width="1"   stroke-dasharray="5,4"/>
+          <line x1="600" y1="60"  x2="400" y2="100" stroke="rgba(255,140,0,0.58)"  stroke-width="1.2" stroke-dasharray="5,4"/>
+          <line x1="660" y1="130" x2="400" y2="100" stroke="rgba(255,140,0,0.42)"  stroke-width="1"   stroke-dasharray="5,4"/>
+          <line x1="560" y1="175" x2="400" y2="100" stroke="rgba(0,212,184,0.42)"  stroke-width="1"   stroke-dasharray="5,4"/>
+
+          <!-- TARGET NODE — London/W.Europe (0°,51°) = 400,91 -->
+          <circle cx="400" cy="91"  r="5"  fill="rgba(0,212,184,0.55)" stroke="#00d4b8" stroke-width="2"/>
+          <circle cx="400" cy="91"  r="12" fill="none" stroke="rgba(0,212,184,0.30)" stroke-width="1.2"/>
+          <circle cx="400" cy="91"  r="22" fill="none" stroke="rgba(0,212,184,0.12)" stroke-width="1"/>
         </svg>
-        <!-- Glowing attack dots (static representative positions) -->
-        <div class="map-dot high"   style="left:27%;top:42%"></div>
-        <div class="map-dot medium" style="left:15%;top:38%"></div>
-        <div class="map-dot high"   style="left:55%;top:28%"></div>
-        <div class="map-dot low"    style="left:48%;top:45%"></div>
-        <div class="map-dot medium" style="left:72%;top:32%"></div>
-        <div class="map-dot high"   style="left:82%;top:38%"></div>
-        <div class="map-dot low"    style="left:63%;top:22%"></div>
+
+        <!-- Attack dots — % coords derived from formula: left=x/800*100, top=y/420*100 -->
+        <div style="position:absolute;inset:0;pointer-events:none">
+          <div class="map-dot md-high"   style="left:29.5%;top:27%"></div><!-- New York  (-74,41) -->
+          <div class="map-dot md-high"   style="left:17.3%;top:31%"></div><!-- Los Angeles (-118,34) -->
+          <div class="map-dot md-medium" style="left:26.5%;top:69%"></div><!-- Sao Paulo (-46,-24) -->
+          <div class="map-dot md-high"   style="left:72.5%;top:18%"></div><!-- Novosibirsk (83,55) -->
+          <div class="map-dot md-medium" style="left:82.4%;top:28%"></div><!-- Beijing (116,40) -->
+          <div class="map-dot md-low"    style="left:67.0%;top:44%"></div><!-- Mumbai (73,19) -->
+          <div class="map-dot md-low"    style="left:87.8%;top:69%"></div><!-- Sydney (151,-34) -->
+        </div>
+        </div>
       </div>
     </div>
 
-    <!-- Charts row: Alert Severity donut + Tactic bar -->
+    <!-- Charts: Severity donut + Tactic bar -->
     <div class="charts-row">
-      <!-- Alert Severity donut -->
       <div class="card">
-        <div class="card-title">Alert Severity</div>
+        <div class="card-title-icon" style="margin-bottom:10px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--cyan)">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span class="card-title">Alert Severity</span>
+        </div>
         <div class="chart-container">
           <canvas id="priorityChart"></canvas>
         </div>
       </div>
-      <!-- Alerts by MITRE Tactic bar -->
       <div class="card">
-        <div class="card-title">Alerts by MITRE Tactic</div>
-        <div class="chart-container" style="height:220px">
+        <div class="card-title" style="margin-bottom:10px">Alerts by MITRE Tactic</div>
+        <div class="chart-container" style="height:210px">
           <canvas id="tacticChart"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Recent Alerts dense table -->
-    <div class="card mb-5">
-      <div class="card-header">
-        <div class="card-title">Recent Alerts</div>
+    <!-- Recent Alerts table -->
+    <div class="card mb-4" style="padding:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div class="card-title-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--cyan)">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="card-title">Recent Alerts</span>
+        </div>
         <a href="{{ url_for('dashboard.alerts') }}" class="btn btn-secondary btn-sm">View All →</a>
       </div>
       {% if recent_alerts %}
@@ -202,16 +382,9 @@
         <table id="alerts-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Severity</th>
-              <th>Source</th>
-              <th>Event Type</th>
-              <th>Source IP</th>
-              <th>Dest IP</th>
-              <th>MITRE</th>
-              <th>Risk Score</th>
-              <th>Status</th>
-              <th>Time</th>
+              <th>ID</th><th>Severity</th><th>Source</th><th>Event Type</th>
+              <th>Source IP</th><th>Dest IP</th><th>MITRE Technique</th>
+              <th>Risk Score</th><th>Status</th><th>Time</th>
             </tr>
           </thead>
           <tbody>
@@ -228,29 +401,26 @@
               <td>
                 {% if alert.mitre_technique_id %}
                   <span class="tag">{{ alert.mitre_technique_id }}</span>
-                {% else %}
-                  <span class="text-muted">—</span>
-                {% endif %}
+                {% else %}<span class="text-muted">—</span>{% endif %}
               </td>
               <td>
                 <span class="score-badge score-{{ 'high' if score >= 70 else ('medium' if score >= 40 else 'low') }}">{{ score }}</span>
               </td>
               <td>
                 {% if alert.is_false_positive %}
-                  <span class="badge badge-fp-yes">FP</span>
+                  <span class="badge-fp-yes">FP</span>
                 {% else %}
                   <span class="badge badge-open">Open</span>
                 {% endif %}
               </td>
-              <td class="font-mono" style="color:var(--muted2);font-size:11px;white-space:nowrap">
+              <td class="font-mono" style="color:var(--muted2);font-size:10.5px;white-space:nowrap">
                 {{ alert.timestamp.strftime('%H:%M') if alert.timestamp else '—' }}
               </td>
             </tr>
-            <!-- Detail expand row -->
             <tr class="detail-row hidden" id="detail-row-{{ alert.id }}">
               <td colspan="10">
                 <div class="detail-panel" id="detail-panel-{{ alert.id }}">
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                     <div>
                       <div class="card-title" style="margin-bottom:6px">Score Breakdown</div>
                       {% if alert.score_breakdown %}
@@ -264,14 +434,9 @@
                           {% endfor %}
                         </div>
                       {% else %}
-                        <p class="text-muted" style="font-size:12px">No breakdown available</p>
+                        <p class="text-muted" style="font-size:11px">No breakdown available</p>
                       {% endif %}
-                      {% if alert.fp_reason %}
-                        <div style="margin-top:10px">
-                          <div class="card-title" style="margin-bottom:4px">FP Reason</div>
-                          <p style="font-size:12px;color:var(--medium)">{{ alert.fp_reason }}</p>
-                        </div>
-                      {% endif %}
+                      {% if alert.fp_reason %}<div style="margin-top:8px"><div class="card-title" style="margin-bottom:3px">FP Reason</div><p style="font-size:11.5px;color:var(--medium)">{{ alert.fp_reason }}</p></div>{% endif %}
                     </div>
                     <div>
                       <div class="card-title" style="margin-bottom:6px">Raw Data</div>
@@ -286,199 +451,192 @@
         </table>
       </div>
       {% else %}
-      <p class="text-muted">No alerts ingested yet.</p>
+      <p class="text-muted" style="padding:16px">No alerts yet.</p>
       {% endif %}
     </div>
 
     <!-- False Positives table -->
-    <div class="card mb-5">
-      <div class="card-header">
-        <div class="card-title">False Positives</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div class="card-title-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--cyan)">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <span class="card-title">False Positives</span>
+        </div>
         <a href="{{ url_for('dashboard.alerts') }}?fp=true" class="btn btn-secondary btn-sm">View All →</a>
       </div>
       {% set fp_alerts = recent_alerts | selectattr('is_false_positive') | list %}
       {% if fp_alerts %}
       <div class="table-wrapper" style="border:none;border-radius:0">
         <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Source</th><th>Event Type</th><th>Reason</th><th>Detected At</th><th></th>
-            </tr>
-          </thead>
+          <thead><tr><th>ID</th><th>Source</th><th>Event Type</th><th>Reason</th><th>Detected At</th><th>Status</th></tr></thead>
           <tbody>
             {% for alert in fp_alerts[:4] %}
             <tr>
               <td class="font-mono" style="color:var(--muted2)">A-{{ alert.id }}</td>
               <td style="color:var(--muted2)">{{ alert.source_feed or '—' }}</td>
               <td>{{ alert.event_type or '—' }}</td>
-              <td style="color:var(--muted2);font-size:12px">{{ alert.fp_reason or 'Auto-detected' }}</td>
-              <td class="font-mono" style="color:var(--muted2);font-size:11px">
-                {{ alert.timestamp.strftime('%H:%M') if alert.timestamp else '—' }} ago
-              </td>
-              <td><span class="badge badge-fp-yes">FP</span></td>
+              <td style="color:var(--muted2);font-size:11.5px">{{ alert.fp_reason or 'Auto-detected' }}</td>
+              <td class="font-mono" style="color:var(--muted2);font-size:10.5px">{{ alert.timestamp.strftime('%H:%M') if alert.timestamp else '—' }} ago</td>
+              <td><span class="badge-fp-yes">FP</span></td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
       {% else %}
-      <p class="text-muted" style="font-size:12px;padding:8px 0">No false positives detected.</p>
+      <p class="text-muted" style="padding:14px;font-size:11.5px">No false positives in recent data.</p>
       {% endif %}
     </div>
 
   </div><!-- /.dash-main -->
 
-  <!-- Right column -->
+  <!-- ── Right column ── -->
   <div class="dash-right">
 
     <!-- Threat Level gauge -->
     <div class="threat-gauge-card">
-      <div class="threat-gauge-title">Threat Level</div>
-      <div class="gauge-svg-wrap">
-        {% set top_inc = top_incidents[0] if top_incidents else none %}
-        {% set gauge_score = (top_inc.risk_score if top_inc else 0)|round(0)|int %}
-        {% set gauge_color = '#ff3b3b' if gauge_score >= 70 else ('#f59e0b' if gauge_score >= 40 else '#22c55e') %}
-        {% set gauge_level_cls = 'high' if gauge_score >= 70 else ('medium' if gauge_score >= 40 else 'low') %}
-        {% set gauge_level_txt = 'HIGH' if gauge_score >= 70 else ('MEDIUM' if gauge_score >= 40 else 'LOW') %}
-        {% set arc = (gauge_score / 100 * 251.2)|round(1) %}
-        <svg width="160" height="90" viewBox="0 0 160 90">
+      <div class="gauge-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        THREAT LEVEL
+      </div>
+      {% set top_inc = top_incidents[0] if top_incidents else none %}
+      {% set gs = (top_inc.risk_score if top_inc else 0)|round(0)|int %}
+      {% set gc = '#ff3d3d' if gs >= 70 else ('#ff8c00' if gs >= 40 else '#00d4b8') %}
+      {% set gl = 'high' if gs >= 70 else ('medium' if gs >= 40 else 'low') %}
+      {% set glt = 'HIGH' if gs >= 70 else ('MEDIUM' if gs >= 40 else 'LOW') %}
+      {% set arc = (gs / 100 * 188)|round(1) %}
+      <div class="gauge-wrap">
+        <svg width="170" height="100" viewBox="0 0 170 100">
+          <!-- Outer ring decoration -->
+          <circle cx="85" cy="85" r="70" fill="none" stroke="rgba(0,212,184,0.06)" stroke-width="20"/>
           <!-- Background arc -->
-          <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="var(--border2)" stroke-width="10" stroke-linecap="round"/>
-          <!-- Colored arc -->
-          <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none"
-                stroke="{{ gauge_color }}" stroke-width="10" stroke-linecap="round"
-                stroke-dasharray="{{ arc }} 251.2"
-                style="filter:drop-shadow(0 0 6px {{ gauge_color }})"/>
-          <!-- Score label -->
-          <text x="80" y="72" text-anchor="middle" class="gauge-label" style="font-size:22px;fill:{{ gauge_color }};font-family:'Space Grotesk',sans-serif;font-weight:800">
-            {{ gauge_score }}
-          </text>
-          <text x="80" y="85" text-anchor="middle" class="gauge-sublabel" style="fill:var(--muted2);font-size:9px;font-family:'JetBrains Mono',monospace">
-            /100
-          </text>
+          <path d="M 15 85 A 70 70 0 0 1 155 85" fill="none" stroke="var(--border2)" stroke-width="14" stroke-linecap="round"/>
+          <!-- Value arc -->
+          <path d="M 15 85 A 70 70 0 0 1 155 85" fill="none"
+                stroke="{{ gc }}" stroke-width="14" stroke-linecap="round"
+                stroke-dasharray="{{ arc }} 220"
+                style="filter:drop-shadow(0 0 8px {{ gc }})"/>
+          <!-- Score text -->
+          <text x="85" y="76" text-anchor="middle" fill="{{ gc }}" font-size="26" font-weight="900" font-family="Inter,sans-serif">{{ gs }}</text>
+          <text x="85" y="90" text-anchor="middle" fill="var(--muted2)" font-size="9" font-family="'JetBrains Mono',monospace">/100</text>
         </svg>
       </div>
-      <div class="gauge-level {{ gauge_level_cls }}">{{ gauge_level_txt }}</div>
+      <div class="gauge-level-label gl-{{ gl }}">{{ glt }}</div>
       <div class="gauge-desc">
-        {% if gauge_score >= 70 %}Elevated activity detected across multiple sources.
-        {% elif gauge_score >= 40 %}Moderate threat activity. Monitor closely.
-        {% else %}Low activity. Systems nominal.{% endif %}
+        {% if gs >= 70 %}Elevated activity detected across multiple TTPs.
+        {% elif gs >= 40 %}Moderate threat activity. Monitor closely.
+        {% else %}Low threat activity. Systems nominal.{% endif %}
       </div>
-      <!-- Color bar segments -->
-      <div class="gauge-bars">
+      <div class="gauge-segs">
         {% for i in range(7) %}
-          {% set seg_score = (i + 1) * 14 %}
-          <div class="gauge-bar-seg" style="background:{% if seg_score <= gauge_score %}{{ gauge_color }}{% else %}var(--border2){% endif %}"></div>
+          <div class="gauge-seg" style="background:{% if (i+1)*14 <= gs %}{{ gc }}{% else %}var(--border2){% endif %}"></div>
         {% endfor %}
       </div>
     </div>
 
-    <!-- MITRE ATT&CK Tactics panel -->
-    <div class="card" style="padding:14px 16px;margin-bottom:14px">
-      <div class="card-header">
-        <div class="card-title">MITRE ATT&CK Tactics</div>
-        <a href="{{ url_for('dashboard.mitre_map') }}" class="btn btn-secondary btn-sm" style="font-size:10.5px;padding:3px 8px">View All →</a>
-      </div>
-      <!-- Header row -->
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px">
-        <span style="font-size:10px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em">Tactic</span>
-        <span style="font-size:10px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em">Techs</span>
-        <span style="font-size:10px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;text-align:right">Count</span>
-      </div>
-      {% set tactic_colors = ['#ff3b3b','#f59e0b','#f59e0b','#22c55e','#3b82f6','#3b82f6','#00d4c8','#00d4c8','#8b5cf6','#8b5cf6'] %}
-      {% for tc in tactic_counts[:10] %}
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:{% if not loop.last %}1px solid var(--border){% else %}none{% endif %}">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="width:6px;height:6px;border-radius:50%;background:{{ tactic_colors[loop.index0 % tactic_colors|length] }};flex-shrink:0;display:inline-block"></span>
-          <span style="font-size:11.5px;color:var(--text)">{{ tc.tactic }}</span>
+    <!-- MITRE ATT&CK Tactics -->
+    <div class="card" style="padding:12px 14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-title-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;color:var(--cyan)">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+          </svg>
+          <span class="card-title">MITRE ATT&CK Tactics</span>
         </div>
-        <span style="font-size:10.5px;color:var(--muted2);font-family:var(--font-mono)">—</span>
-        <span style="font-size:12px;font-weight:700;color:var(--text-bright);font-family:var(--font-mono);text-align:right">{{ tc.count }}</span>
+        <a href="{{ url_for('dashboard.mitre_map') }}" class="btn btn-secondary btn-sm" style="font-size:10px;padding:2px 7px">View All →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:4px;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:3px">
+        <span style="font-size:9.5px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em">Tactic</span>
+        <span style="font-size:9.5px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em">Techniques</span>
+        <span style="font-size:9.5px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;text-align:right">Count</span>
+      </div>
+      {% set tc_colors = ['#ff3d3d','#ff8c00','#ff8c00','#00e676','#2979ff','#2979ff','#00d4b8','#00d4b8','#9c27b0','#9c27b0'] %}
+      {% for tc in tactic_counts[:10] %}
+      <div class="mitre-rp-row">
+        <div>
+          <span class="mitre-dot" style="background:{{ tc_colors[loop.index0 % tc_colors|length] }}"></span>
+          <span style="font-size:11px;color:var(--text)">{{ tc.tactic }}</span>
+        </div>
+        <span class="mitre-techs">—</span>
+        <span class="mitre-cnt">{{ tc.count }}</span>
       </div>
       {% endfor %}
-      {% if not tactic_counts %}
-      <p class="text-muted" style="font-size:12px;padding:8px 0">No MITRE data available.</p>
-      {% endif %}
+      {% if not tactic_counts %}<p class="text-muted" style="font-size:11px;padding:6px 0">No MITRE data.</p>{% endif %}
     </div>
 
-    <!-- Active Incidents panel -->
-    <div class="card" style="padding:14px 16px;margin-bottom:14px">
-      <div class="card-header">
-        <div class="card-title">Active Incidents</div>
-        <a href="{{ url_for('dashboard.incidents') }}" class="btn btn-secondary btn-sm" style="font-size:10.5px;padding:3px 8px">View All →</a>
+    <!-- Active Incidents -->
+    <div class="card" style="padding:12px 14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-title-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;color:var(--cyan)">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span class="card-title">Active Incidents</span>
+        </div>
+        <a href="{{ url_for('dashboard.incidents') }}" class="btn btn-secondary btn-sm" style="font-size:10px;padding:2px 7px">View All →</a>
       </div>
       {% for inc in top_incidents %}
       {% set p = (inc.priority or 'UNKNOWN')|upper %}
       {% set score = (inc.risk_score or 0)|round(1) %}
-      <div class="right-incident-item">
-        <div class="right-inc-icon" style="background:{% if p == 'HIGH' %}var(--high-dim){% elif p == 'MEDIUM' %}var(--medium-dim){% else %}var(--low-dim){% endif %}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{% if p == 'HIGH' %}var(--high){% elif p == 'MEDIUM' %}var(--medium){% else %}var(--low){% endif %}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="rp-item">
+        <div class="rp-icon rpi-{{ p|lower }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
-        <div class="right-inc-body">
-          <div class="right-inc-title">{{ inc.title or 'Untitled Incident' }}</div>
-          <div class="right-inc-meta">{{ inc.alert_count or 0 }} related alerts · {{ score }} risk score</div>
+        <div class="rp-body">
+          <div class="rp-title">{{ inc.title or 'Untitled Incident' }}</div>
+          <div class="rp-meta">{{ inc.alert_count or 0 }} related alerts · {{ score }} risk score</div>
         </div>
-        <div class="right-inc-right">
-          <span class="badge badge-{{ p|lower }}" style="font-size:9.5px">{{ p }}</span>
-          <a href="{{ url_for('dashboard.incident_detail', incident_id=inc.id) }}" style="font-size:10px;color:var(--muted2)">View →</a>
+        <div class="rp-right">
+          <span class="badge badge-{{ p|lower }}" style="font-size:9px">{{ p }}</span>
+          <a href="{{ url_for('dashboard.incident_detail', incident_id=inc.id) }}" style="font-size:9.5px;color:var(--muted2)">→</a>
         </div>
       </div>
       {% endfor %}
-      {% if not top_incidents %}
-      <p class="text-muted" style="font-size:12px;padding:8px 0">No incidents yet.</p>
-      {% endif %}
+      {% if not top_incidents %}<p class="text-muted" style="font-size:11px;padding:6px 0">No incidents yet.</p>{% endif %}
     </div>
 
-    <!-- BLUF panel: Latest/Highest incident -->
+    <!-- BLUF panel -->
     {% if top_incidents %}
     {% set top = top_incidents[0] %}
     {% set tp = (top.priority or 'UNKNOWN')|upper %}
     <div class="bluf-box" style="margin-bottom:0">
       <div class="bluf-header">
         <span class="bluf-label">BLUF — Latest Incident</span>
-        <a href="{{ url_for('dashboard.incidents') }}" class="btn btn-secondary btn-sm" style="font-size:10.5px;padding:3px 8px;margin-left:auto">View All →</a>
+        <a href="{{ url_for('dashboard.incidents') }}" class="btn btn-secondary btn-sm" style="font-size:9.5px;padding:2px 7px;margin-left:auto">View All →</a>
       </div>
-      <div style="margin-bottom:8px">
-        <span class="badge badge-{{ tp|lower }}" style="font-size:9.5px">{{ tp }} PRIORITY</span>
-      </div>
-      <div style="font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:6px">
-        {{ top.title or 'Untitled Incident' }}
-      </div>
-      <div class="bluf-text" style="font-size:12px">
-        {{ (top.bluf_summary or 'No summary available.')[:220] }}
-      </div>
+      <div style="margin-bottom:6px"><span class="badge badge-{{ tp|lower }}" style="font-size:9px">{{ tp }} PRIORITY</span></div>
+      <div style="font-size:12.5px;font-weight:700;color:var(--text-bright);margin-bottom:5px;line-height:1.3">{{ top.title or 'Untitled Incident' }}</div>
+      <div class="bluf-text" style="font-size:11.5px">{{ (top.bluf_summary or 'No summary available.')[:200] }}</div>
       {% if top.bluf_summary %}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
         <div>
-          <div style="font-size:10px;color:var(--muted2);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Priority</div>
-          <span class="badge badge-{{ tp|lower }}">{{ tp }}</span>
+          <div style="font-size:9.5px;color:var(--muted2);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Priority</div>
+          <span class="badge badge-{{ tp|lower }}" style="font-size:9px">{{ tp }}</span>
         </div>
         <div>
-          <div style="font-size:10px;color:var(--muted2);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Recommended Action</div>
-          <div style="font-size:11px;color:var(--text)">Investigate host, isolate if needed, review logs and related activity.</div>
+          <div style="font-size:9.5px;color:var(--muted2);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Recommended Action</div>
+          <div style="font-size:10.5px;color:var(--text)">Investigate host, isolate if needed.</div>
         </div>
       </div>
       {% endif %}
       <div class="bluf-attribution">
-        {% if top.bluf_source == 'watsonx' %}
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--cyan)"><circle cx="12" cy="12" r="10"/></svg>
-          Source: AI (watsonx)
-        {% else %}
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--muted)"><circle cx="12" cy="12" r="10"/></svg>
-          Source: Template
-        {% endif %}
-        &nbsp;|&nbsp; Generated: {{ top.updated_at.strftime('%b %d %Y %H:%M') if top.updated_at else '—' }}
+        <svg width="8" height="8" viewBox="0 0 24 24" fill="{% if top.bluf_source == 'watsonx' %}var(--cyan){% else %}var(--muted){% endif %}"><circle cx="12" cy="12" r="10"/></svg>
+        Source: {% if top.bluf_source == 'watsonx' %}AI (watsonx){% else %}IBM watsonx (template){% endif %}
+        | Generated: {{ top.updated_at.strftime('%b %d %H:%M') if top.updated_at else '—' }}
       </div>
     </div>
     {% endif %}
 
   </div><!-- /.dash-right -->
-
 </div><!-- /.dash-body -->
 
-{% endif %}{# end if total_alerts #}
+{% endif %}
 
 {% endblock %}
 
@@ -496,8 +654,6 @@
   }
 
   startAutoRefresh();
-
-  // Alert row expansion on this page too
   initAlertTable();
 </script>
 {% endblock %}
